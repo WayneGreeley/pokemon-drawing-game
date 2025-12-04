@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [-] 1. Initialize GitHub repository and project structure
+- [x] 1. Initialize GitHub repository and project structure
   - [x] 1.1 Create GitHub repository (public)
     - Create new public repository on GitHub
     - Name: pokemon-drawing-game
@@ -26,7 +26,7 @@
     - Document Kiro spec usage
     - _Requirements: Contest submission_
 
-  - [-] 1.4 Initial commit and push
+  - [x] 1.4 Initial commit and push
     - Initialize git repository
     - Add .kiro/specs directory
     - Add .gitignore
@@ -36,7 +36,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 2. Set up project structure and dependencies
+- [-] 2. Set up project structure and dependencies
   - Create new project directory for the Pokémon Drawing Game
   - Initialize package.json with Vite, TypeScript, and Vue 3
   - Install AWS SDK v3 packages (not needed for frontend with Lambda Function URL)
