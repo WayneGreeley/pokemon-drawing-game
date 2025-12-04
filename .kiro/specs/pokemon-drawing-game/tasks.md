@@ -36,7 +36,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 2. Set up project structure and dependencies
+- [x] 2. Set up project structure and dependencies
   - Create new project directory for the Pokémon Drawing Game
   - Initialize package.json with Vite, TypeScript, and Vue 3
   - Install AWS SDK v3 packages (not needed for frontend with Lambda Function URL)
@@ -49,14 +49,14 @@
   - Commit and push: "Setup project dependencies and configuration"
   - _Requirements: All_
 
-- [ ] 3. Implement drawing canvas component
-  - [ ] 3.1 Create DrawingCanvas Vue component with HTML5 canvas element
+- [-] 3. Implement drawing canvas component
+  - [x] 3.1 Create DrawingCanvas Vue component with HTML5 canvas element
     - Implement canvas initialization with proper dimensions
     - Set up canvas context (2d) with appropriate settings
     - Add canvas element to component template
     - _Requirements: 1.1_
 
-  - [ ] 3.2 Implement drawing tool functionality
+  - [x] 3.2 Implement drawing tool functionality
     - Add brush tool with configurable size and color
     - Add eraser tool functionality
     - Implement mouse event handlers (mousedown, mousemove, mouseup)
@@ -68,7 +68,7 @@
     - **Property 1: Tool selection enables drawing**
     - **Validates: Requirements 1.2**
 
-  - [ ] 3.4 Implement canvas controls UI
+  - [x] 3.4 Implement canvas controls UI
     - Add color picker component
     - Add brush size slider
     - Add clear button
@@ -76,7 +76,7 @@
     - Style controls with clean, accessible UI
     - _Requirements: 1.4, 1.5, 5.1_
 
-  - [ ] 3.5 Implement clear functionality
+  - [x] 3.5 Implement clear functionality
     - Clear canvas content when clear button clicked
     - Reset tool settings to defaults
     - _Requirements: 5.2, 5.3_
@@ -86,7 +86,7 @@
     - **Property 9: Clear resets tool settings**
     - **Validates: Requirements 5.2, 5.3**
 
-  - [ ] 3.7 Implement canvas to image export
+  - [x] 3.7 Implement canvas to image export
     - Add exportImage method to convert canvas to Blob
     - Support PNG format
     - Validate image size (max 1MB)
@@ -96,7 +96,7 @@
     - **Property 2: Canvas to image conversion produces valid format**
     - **Validates: Requirements 2.1**
 
-  - [ ] 3.9 Implement Halloween/spooky theme
+  - [x] 3.9 Implement Halloween/spooky theme
     - Create dark color scheme CSS with purples (#6B46C1, #9333EA), blacks (#0F0F0F, #1A1A1A), eerie greens (#10B981, #34D399)
     - Add Ghost-type Pokémon images (Gengar, Spectrier, Giratina) to page header
     - Implement CSS fog/mist animation effect outside canvas area
@@ -105,7 +105,7 @@
     - Add subtle purple glow effects to canvas border
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [ ] 3.10 Commit and push canvas component
+  - [-] 3.10 Commit and push canvas component
     - Commit with message: "Implement drawing canvas with Halloween theme"
     - Push to GitHub
     - _Requirements: Contest submission_
