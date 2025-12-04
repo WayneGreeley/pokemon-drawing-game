@@ -1,17 +1,96 @@
 <template>
   <div class="app">
-    <header class="header">
-      <h1 class="title">Pokémon Drawing Game</h1>
-      <p class="subtitle">Draw a Pokémon and let AI guess what it is!</p>
-    </header>
+    <HalloweenHeader />
+    
     <main class="main">
-      <p>Coming soon...</p>
+      <div class="canvas-section">
+        <DrawingCanvas
+          ref="canvasRef"
+        />
+      </div>
+      
+      <div class="controls-section">
+        <CanvasControls
+          :current-tool="currentTool"
+          :current-color="currentColor"
+          :current-size="currentSize"
+          :is-submitting="isSubmitting"
+          @tool-change="handleToolChange"
+          @color-change="handleColorChange"
+          @size-change="handleSizeChange"
+          @clear="handleClear"
+          @submit="handleSubmit"
+        />
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-// App component - main entry point
+import { ref } from 'vue'
+import HalloweenHeader from './components/HalloweenHeader.vue'
+import DrawingCanvas from './components/DrawingCanvas.vue'
+import CanvasControls from './components/CanvasControls.vue'
+import type { DrawingTool } from './types'
+
+// Refs
+const canvasRef = ref<InstanceType<typeof DrawingCanvas> | null>(null)
+
+// State
+const currentTool = ref<DrawingTool>('brush')
+const currentColor = ref('#000000')
+const currentSize = ref(5)
+const isSubmitting = ref(false)
+
+// Handlers
+const handleToolChange = (tool: DrawingTool) => {
+  currentTool.value = tool
+  canvasRef.value?.setTool(tool)
+}
+
+const handleColorChange = (color: string) => {
+  currentColor.value = color
+  canvasRef.value?.setColor(color)
+}
+
+const handleSizeChange = (size: number) => {
+  currentSize.value = size
+  canvasRef.value?.setBrushSize(size)
+}
+
+const handleClear = () => {
+  canvasRef.value?.clear()
+  // Reset to defaults
+  currentTool.value = 'brush'
+  currentColor.value = '#000000'
+  currentSize.value = 5
+  canvasRef.value?.setTool('brush')
+  canvasRef.value?.setColor('#000000')
+  canvasRef.value?.setBrushSize(5)
+}
+
+const handleSubmit = async () => {
+  if (!canvasRef.value) return
+  
+  isSubmitting.value = true
+  
+  try {
+    const imageBlob = await canvasRef.value.exportImage()
+    if (!imageBlob) {
+      console.error('Failed to export image')
+      return
+    }
+    
+    // TODO: Upload to Lambda and get AI recognition result
+    console.log('Image exported:', imageBlob)
+    alert('Image export successful! Upload functionality coming soon.')
+  } catch (error) {
+    console.error('Error submitting drawing:', error)
+    alert('Failed to submit drawing. Please try again.')
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -21,29 +100,27 @@
   flex-direction: column;
 }
 
-.header {
-  text-align: center;
-  padding: 2rem;
-}
-
-.title {
-  font-family: 'Creepster', cursive;
-  font-size: 3rem;
-  color: #9333EA;
-  margin: 0;
-  text-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
-}
-
-.subtitle {
-  color: #E5E7EB;
-  margin-top: 0.5rem;
-}
-
 .main {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  gap: 2rem;
   padding: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.canvas-section {
+  flex-shrink: 0;
+}
+
+.controls-section {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1200px) {
+  .main {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

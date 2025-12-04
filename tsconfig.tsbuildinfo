@@ -1,1 +1,1 @@
-{"root":["./src/main.ts","./src/vite-env.d.ts","./src/types/index.ts","./src/app.vue","./src/components/helloworld.vue"],"version":"5.9.3"}
+{"root":["./src/main.ts","./src/vite-env.d.ts","./src/types/index.ts","./src/app.vue","./src/components/canvascontrols.vue","./src/components/drawingcanvas.vue","./src/components/halloweenheader.vue","./src/components/helloworld.vue"],"version":"5.9.3"}
