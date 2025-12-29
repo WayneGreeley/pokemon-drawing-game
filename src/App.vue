@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <HalloweenHeader />
+    <AppHeader />
     
     <main class="main">
       <div class="canvas-section">
@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import HalloweenHeader from './components/HalloweenHeader.vue'
+import AppHeader from './components/AppHeader.vue'
 import DrawingCanvas from './components/DrawingCanvas.vue'
 import CanvasControls from './components/CanvasControls.vue'
 import type { DrawingTool } from './types'
