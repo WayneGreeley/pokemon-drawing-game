@@ -1,27 +1,21 @@
 <template>
-  <header class="halloween-header">
+  <header class="app-header">
     <div class="fog fog-1"></div>
     <div class="fog fog-2"></div>
     <div class="fog fog-3"></div>
     
-    <div class="ghost-pokemon">
-      <div class="ghost-icon">👻</div>
-      <div class="ghost-icon">🎃</div>
-      <div class="ghost-icon">👻</div>
-    </div>
-    
-    <h1 class="spooky-title">Pokémon Drawing Game</h1>
-    <p class="subtitle">Draw a Pokémon... if you dare! 🎃</p>
-    <p class="tagline">Let the AI guess what lurks in your drawing...</p>
+    <h1 class="main-title">Pokémon Drawing Game</h1>
+    <p class="subtitle">Draw a Pokémon and let AI guess what it is!</p>
+    <p class="tagline">Test your artistic skills against machine learning</p>
   </header>
 </template>
 
 <script setup lang="ts">
-// Halloween-themed header component
+// App header component
 </script>
 
 <style scoped>
-.halloween-header {
+.app-header {
   position: relative;
   text-align: center;
   padding: 3rem 2rem 2rem;
@@ -72,50 +66,13 @@
   }
 }
 
-/* Ghost Pokémon icons */
-.ghost-pokemon {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  margin-bottom: 1.5rem;
-  z-index: 1;
-}
-
-.ghost-icon {
-  font-size: 3rem;
-  animation: float 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.6));
-}
-
-.ghost-icon:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.ghost-icon:nth-child(2) {
-  animation-delay: 1s;
-}
-
-.ghost-icon:nth-child(3) {
-  animation-delay: 2s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
 /* Title styling */
-.spooky-title {
+.main-title {
   position: relative;
   font-family: 'Creepster', cursive;
   font-size: 4rem;
   color: #9333EA;
-  margin: 0;
+  margin: 0 0 1rem 0;
   text-shadow: 
     0 0 20px rgba(147, 51, 234, 0.8),
     0 0 40px rgba(147, 51, 234, 0.5),
@@ -161,12 +118,8 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .spooky-title {
+  .main-title {
     font-size: 2.5rem;
-  }
-  
-  .ghost-icon {
-    font-size: 2rem;
   }
   
   .subtitle {

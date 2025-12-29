@@ -15,7 +15,7 @@
           :class="{ active: currentTool === 'eraser' }"
           @click="$emit('tool-change', 'eraser')"
         >
-          🧹 Eraser
+          ✏️ Eraser
         </button>
       </div>
     </div>
@@ -50,7 +50,7 @@
         🗑️ Clear Canvas
       </button>
       <button class="btn btn-submit" @click="$emit('submit')" :disabled="isSubmitting">
-        {{ isSubmitting ? '⏳ Analyzing...' : '🎨 Submit Drawing' }}
+        {{ isSubmitting ? '⏳ Analyzing...' : '🎯 Submit Drawing' }}
       </button>
     </div>
   </div>
