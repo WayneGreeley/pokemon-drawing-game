@@ -15,11 +15,16 @@
           :current-color="currentColor"
           :current-size="currentSize"
           :is-submitting="isSubmitting"
+          :can-upload="canUpload"
+          :remaining-uploads="remainingUploads"
+          :max-uploads="maxUploads"
+          :time-remaining="timeRemaining"
           @tool-change="handleToolChange"
           @color-change="handleColorChange"
           @size-change="handleSizeChange"
           @clear="handleClear"
           @submit="handleSubmit"
+          @reset-rate-limit="handleResetRateLimit"
         />
       </div>
     </main>
@@ -27,10 +32,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import DrawingCanvas from './components/DrawingCanvas.vue'
 import CanvasControls from './components/CanvasControls.vue'
+import { rateLimiter } from './services/RateLimiter'
 import type { DrawingTool } from './types'
 
 // Refs
@@ -41,6 +47,18 @@ const currentTool = ref<DrawingTool>('brush')
 const currentColor = ref('#000000')
 const currentSize = ref(5)
 const isSubmitting = ref(false)
+
+// Rate limiting state
+const remainingUploads = ref(10)
+const maxUploads = ref(10)
+const timeRemaining = ref('')
+const canUpload = computed(() => remainingUploads.value > 0)
+
+// Update rate limit info
+const updateRateLimitInfo = () => {
+  remainingUploads.value = rateLimiter.getRemainingCount()
+  timeRemaining.value = rateLimiter.getTimeRemainingFormatted()
+}
 
 // Handlers
 const handleToolChange = (tool: DrawingTool) => {
@@ -72,6 +90,12 @@ const handleClear = () => {
 const handleSubmit = async () => {
   if (!canvasRef.value) return
   
+  // Check rate limit
+  if (!rateLimiter.checkLimit()) {
+    alert(`Upload limit reached! Please wait ${rateLimiter.getTimeRemainingFormatted()} before trying again.`)
+    return
+  }
+  
   isSubmitting.value = true
   
   try {
@@ -80,6 +104,10 @@ const handleSubmit = async () => {
       console.error('Failed to export image')
       return
     }
+    
+    // Increment rate limit counter
+    rateLimiter.incrementCount()
+    updateRateLimitInfo()
     
     // TODO: Upload to Lambda and get AI recognition result
     console.log('Image exported:', imageBlob)
@@ -91,6 +119,16 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
+
+const handleResetRateLimit = () => {
+  rateLimiter.reset()
+  updateRateLimitInfo()
+}
+
+// Initialize rate limit info on mount
+onMounted(() => {
+  updateRateLimitInfo()
+})
 </script>
 
 <style scoped>
