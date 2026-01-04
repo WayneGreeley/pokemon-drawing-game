@@ -134,7 +134,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 5. Implement upload service
+- [x] 5. Implement upload service
   - [x] 5.1 Create UploadService class
     - Implement HTTP POST to Lambda Function URL
     - Implement upload progress tracking
@@ -180,17 +180,17 @@
     - Handle malformed responses
     - _Requirements: 3.5, 4.1_
 
-  - [-] 5.9 Commit and push upload service
+  - [x] 5.9 Commit and push upload service
     - Commit with message: "Implement upload service with Lambda Function URL"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 6. Checkpoint - Ensure frontend tests pass
+- [x] 6. Checkpoint - Ensure frontend tests pass
   - Ensure all tests pass, ask the user if questions arise.
   - Commit and push: "Frontend checkpoint - all tests passing"
 
-- [ ] 7. Create AWS SAM infrastructure template
-  - [ ] 7.1 Create SAM template.yaml
+- [-] 7. Create AWS SAM infrastructure template
+  - [x] 7.1 Create SAM template.yaml
     - Define Lambda function resource with Function URL
     - Configure runtime: nodejs20.x, memory: 512MB, timeout: 30s
     - Enable Function URL with CORS configuration
@@ -199,14 +199,14 @@
     - Define parameters for Bedrock Agent ID and Alias ID
     - _Requirements: All backend_
 
-  - [ ] 7.2 Create samconfig.toml
+  - [x] 7.2 Create samconfig.toml
     - Configure deployment settings
     - Set default region
     - Set stack name: pokemon-drawing-game
     - Configure parameter overrides
     - _Requirements: All backend_
 
-  - [ ] 7.3 Add Bedrock Agent to SAM template
+  - [x] 7.3 Add Bedrock Agent to SAM template
     - Define AWS::Bedrock::Agent resource
     - Set AgentName: "PokemonIdentifierAgent"
     - Set FoundationModel: "anthropic.claude-3-haiku-20240307-v1:0"
@@ -216,7 +216,7 @@
     - Output Agent ID and Alias ID
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 7.4 Add CloudWatch alarms to SAM template
+  - [x] 7.4 Add CloudWatch alarms to SAM template
     - Define alarm for high Lambda invocation volume (>1500/day)
     - Define alarm for Bedrock cost protection (>2000/month)
     - Define alarm for Lambda error rate (>10%)
@@ -224,7 +224,7 @@
     - Add email subscription parameter
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [ ] 7.5 Add CloudFront distribution to SAM template
+  - [x] 7.5 Add CloudFront distribution to SAM template
     - Define S3 bucket for static website hosting
     - Define CloudFront distribution with S3 origin
     - Configure HTTPS only
@@ -232,7 +232,7 @@
     - Output CloudFront domain URL
     - _Requirements: 8.1_
 
-  - [ ] 7.6 Commit SAM template
+  - [-] 7.6 Commit SAM template
     - Commit with message: "Add AWS SAM infrastructure template"
     - Push to GitHub
     - _Requirements: Contest submission_
