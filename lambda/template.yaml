@@ -46,12 +46,6 @@ Resources:
           BEDROCK_REGION: !Ref BedrockRegion
           BEDROCK_AGENT_ID: !Ref PokemonBedrockAgent
           BEDROCK_AGENT_ALIAS_ID: !Ref PokemonBedrockAgentAlias
-      Events:
-        FunctionUrlEvent:
-          Type: HttpApi
-          Properties:
-            Path: /
-            Method: post
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
@@ -63,7 +57,6 @@ Resources:
             - X-Api-Key
           AllowMethods:
             - POST
-            - OPTIONS
           AllowOrigins:
             - "*"  # Will be updated with CloudFront domain after deployment
           MaxAge: 3600
@@ -158,7 +151,7 @@ Resources:
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         BlockPublicPolicy: false
-        IgnorePublicAcls: false
+        IgnorePublicAcls: true
         RestrictPublicBuckets: false
       WebsiteConfiguration:
         IndexDocument: index.html
