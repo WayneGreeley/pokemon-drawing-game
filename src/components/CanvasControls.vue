@@ -1,5 +1,13 @@
 <template>
   <div class="canvas-controls">
+    <RateLimitDisplay
+      v-if="remainingUploads !== undefined && maxUploads !== undefined"
+      :remaining="remainingUploads"
+      :max-uploads="maxUploads"
+      :time-remaining="timeRemaining || ''"
+      @reset="$emit('reset-rate-limit')"
+    />
+
     <div class="control-group">
       <label class="control-label">Tool</label>
       <div class="tool-buttons">
@@ -49,7 +57,12 @@
       <button class="btn btn-clear" @click="$emit('clear')">
         🗑️ Clear Canvas
       </button>
-      <button class="btn btn-submit" @click="$emit('submit')" :disabled="isSubmitting">
+      <button 
+        class="btn btn-submit" 
+        @click="$emit('submit')" 
+        :disabled="isSubmitting || !canUpload"
+        :title="!canUpload ? 'Upload limit reached' : ''"
+      >
         {{ isSubmitting ? '⏳ Analyzing...' : '🎯 Submit Drawing' }}
       </button>
     </div>
@@ -58,12 +71,17 @@
 
 <script setup lang="ts">
 import type { DrawingTool } from '@/types'
+import RateLimitDisplay from './RateLimitDisplay.vue'
 
 interface Props {
   currentTool: DrawingTool
   currentColor: string
   currentSize: number
   isSubmitting?: boolean
+  canUpload?: boolean
+  remainingUploads?: number
+  maxUploads?: number
+  timeRemaining?: string
 }
 
 defineProps<Props>()
@@ -74,6 +92,7 @@ defineEmits<{
   'size-change': [size: number]
   'clear': []
   'submit': []
+  'reset-rate-limit': []
 }>()
 </script>
 
