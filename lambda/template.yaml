@@ -179,6 +179,15 @@ Resources:
             Condition:
               StringEquals:
                 'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !Sub '${FrontendBucket}/*'
+              - !GetAtt FrontendBucket.Arn
+            Condition:
+              Bool:
+                'aws:SecureTransport': 'false'
 
   # CloudFront Origin Access Control
   OriginAccessControl:
@@ -251,12 +260,13 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub '${AWS::StackName}-HighInvocationVolume'
-      AlarmDescription: Alert when Lambda invocations exceed 1500 per day
+      AlarmDescription: Alert when Lambda invocations exceed 100 per day
       MetricName: Invocations
       Namespace: AWS/Lambda
       Statistic: Sum
       Period: 86400  # 24 hours
       EvaluationPeriods: 1
+      DatapointsToAlarm: 1
       Threshold: 100
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
@@ -270,13 +280,14 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub '${AWS::StackName}-BedrockCostProtection'
-      AlarmDescription: Alert when Bedrock invocations exceed 2000 per month
+      AlarmDescription: Alert when Bedrock invocations exceed 1000 per month
       MetricName: Invocations
       Namespace: AWS/Lambda
       Statistic: Sum
       Period: 2592000  # 30 days
       EvaluationPeriods: 1
-      Threshold: 2000
+      DatapointsToAlarm: 1
+      Threshold: 1000
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: FunctionName
@@ -290,12 +301,13 @@ Resources:
     Properties:
       AlarmName: !Sub '${AWS::StackName}-LambdaErrorRate'
       AlarmDescription: Alert when Lambda error rate exceeds 10%
-      MetricName: ErrorRate
+      MetricName: Errors
       Namespace: AWS/Lambda
-      Statistic: Average
+      Statistic: Sum
       Period: 300  # 5 minutes
-      EvaluationPeriods: 2
-      Threshold: 10
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 2
+      Threshold: 5
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: FunctionName
@@ -307,7 +319,7 @@ Resources:
 Outputs:
   LambdaFunctionUrl:
     Description: Lambda Function URL for the Pokémon recognition API
-    Value: !GetAtt PokemonLambdaUrl.FunctionUrl
+    Value: !GetAtt PokemonLambda.FunctionUrl
     Export:
       Name: !Sub '${AWS::StackName}-LambdaFunctionUrl'
 
