@@ -110,7 +110,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 4. Implement rate limiting system
+- [x] 4. Implement rate limiting system
   - [x] 4.1 Create RateLimiter class
     - Implement session-based upload tracking using localStorage
     - Set maximum uploads per session (10)
@@ -129,13 +129,13 @@
     - **Property 15: Upload count tracking is accurate**
     - **Validates: Requirements 7.3, 7.4**
 
-  - [-] 4.4 Commit and push rate limiting
+  - [x] 4.4 Commit and push rate limiting
     - Commit with message: "Implement rate limiting system"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 5. Implement upload service
-  - [ ] 5.1 Create UploadService class
+- [-] 5. Implement upload service
+  - [x] 5.1 Create UploadService class
     - Implement HTTP POST to Lambda Function URL
     - Implement upload progress tracking
     - Integrate with RateLimiter
@@ -143,7 +143,7 @@
     - Store Lambda Function URL in .env (not committed)
     - _Requirements: 2.2_
 
-  - [ ] 5.2 Implement Lambda Function URL communication
+  - [x] 5.2 Implement Lambda Function URL communication
     - Use fetch API to POST image blob to Lambda
     - Set proper Content-Type headers
     - Use HTTPS for all communication
@@ -155,7 +155,7 @@
     - **Property 10: Lambda communication uses HTTPS**
     - **Validates: Requirements 6.1**
 
-  - [ ] 5.4 Add loading indicator during upload
+  - [x] 5.4 Add loading indicator during upload
     - Show spinner/progress bar during upload
     - Disable UI interactions while uploading
     - _Requirements: 2.3_
@@ -164,7 +164,7 @@
     - **Property 4: Upload progress shows loading indicator**
     - **Validates: Requirements 2.3**
 
-  - [ ] 5.6 Implement upload error handling
+  - [x] 5.6 Implement upload error handling
     - Handle network errors with retry mechanism
     - Display user-friendly error messages
     - Provide retry button on failure
@@ -174,13 +174,13 @@
     - **Property 5: Failed upload provides retry capability**
     - **Validates: Requirements 2.4**
 
-  - [ ] 5.8 Parse Lambda response
+  - [x] 5.8 Parse Lambda response
     - Parse JSON response from Lambda
     - Extract Pokémon name, confidence score, explanation
     - Handle malformed responses
     - _Requirements: 3.5, 4.1_
 
-  - [ ] 5.9 Commit and push upload service
+  - [-] 5.9 Commit and push upload service
     - Commit with message: "Implement upload service with Lambda Function URL"
     - Push to GitHub
     - _Requirements: Contest submission_

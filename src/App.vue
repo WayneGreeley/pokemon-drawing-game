@@ -28,6 +28,27 @@
         />
       </div>
     </main>
+    
+    <!-- Loading Indicator -->
+    <LoadingIndicator
+      :is-visible="showLoading"
+      title="Analyzing Drawing"
+      message="Our AI is examining your artwork..."
+      :progress="uploadProgress"
+      :show-progress="true"
+      :show-cancel="true"
+      @cancel="handleCancelUpload"
+    />
+    
+    <!-- Error Dialog -->
+    <ErrorDialog
+      :is-visible="showError"
+      :message="errorMessage"
+      :details="errorDetails"
+      :show-retry="true"
+      @retry="handleRetryUpload"
+      @close="handleCloseError"
+    />
   </div>
 </template>
 
@@ -36,8 +57,11 @@ import { ref, computed, onMounted } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import DrawingCanvas from './components/DrawingCanvas.vue'
 import CanvasControls from './components/CanvasControls.vue'
+import LoadingIndicator from './components/LoadingIndicator.vue'
+import ErrorDialog from './components/ErrorDialog.vue'
 import { rateLimiter } from './services/RateLimiter'
-import type { DrawingTool } from './types'
+import { uploadService } from './services/UploadService'
+import type { DrawingTool, RecognitionResult } from './types'
 
 // Refs
 const canvasRef = ref<InstanceType<typeof DrawingCanvas> | null>(null)
@@ -53,6 +77,17 @@ const remainingUploads = ref(10)
 const maxUploads = ref(10)
 const timeRemaining = ref('')
 const canUpload = computed(() => remainingUploads.value > 0)
+
+// Upload state
+const uploadProgress = ref(0)
+const showLoading = ref(false)
+const showError = ref(false)
+const errorMessage = ref('')
+const errorDetails = ref('')
+const lastImageBlob = ref<Blob | null>(null)
+
+// Results state
+const recognitionResult = ref<RecognitionResult | null>(null)
 
 // Update rate limit info
 const updateRateLimitInfo = () => {
@@ -92,32 +127,129 @@ const handleSubmit = async () => {
   
   // Check rate limit
   if (!rateLimiter.checkLimit()) {
-    alert(`Upload limit reached! Please wait ${rateLimiter.getTimeRemainingFormatted()} before trying again.`)
+    showErrorDialog(
+      `You've reached your upload limit. Please wait ${rateLimiter.getTimeRemainingFormatted()} before trying again.`,
+      ''
+    )
     return
   }
   
   isSubmitting.value = true
+  showLoading.value = true
+  uploadProgress.value = 0
   
   try {
     const imageBlob = await canvasRef.value.exportImage()
     if (!imageBlob) {
-      console.error('Failed to export image')
-      return
+      throw new Error('Failed to export image from canvas')
     }
     
-    // Increment rate limit counter
-    rateLimiter.incrementCount()
-    updateRateLimitInfo()
+    lastImageBlob.value = imageBlob
     
-    // TODO: Upload to Lambda and get AI recognition result
-    console.log('Image exported:', imageBlob)
-    alert('Image export successful! Upload functionality coming soon.')
+    // Start progress monitoring
+    const progressInterval = setInterval(() => {
+      uploadProgress.value = uploadService.getUploadProgress()
+    }, 100)
+    
+    try {
+      const result = await uploadService.analyzeImageWithRetry(imageBlob)
+      
+      // Increment rate limit counter on successful upload
+      rateLimiter.incrementCount()
+      updateRateLimitInfo()
+      
+      // Store result and show success
+      recognitionResult.value = result
+      console.log('Recognition result:', result)
+      
+      // TODO: Show results in a proper results component
+      alert(`AI thinks you drew: ${result.pokemonName} (${result.confidenceScore}% confidence)\n\nExplanation: ${result.explanation}`)
+      
+    } finally {
+      clearInterval(progressInterval)
+    }
+    
   } catch (error) {
     console.error('Error submitting drawing:', error)
-    alert('Failed to submit drawing. Please try again.')
+    
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred'
+    
+    showErrorDialog(
+      errorMsg,
+      error instanceof Error ? error.stack || '' : ''
+    )
   } finally {
     isSubmitting.value = false
+    showLoading.value = false
+    uploadProgress.value = 0
   }
+}
+
+const showErrorDialog = (message: string, details: string) => {
+  errorMessage.value = message
+  errorDetails.value = details
+  showError.value = true
+}
+
+const handleRetryUpload = () => {
+  showError.value = false
+  if (lastImageBlob.value) {
+    handleSubmitWithBlob(lastImageBlob.value)
+  }
+}
+
+const handleSubmitWithBlob = async (imageBlob: Blob) => {
+  isSubmitting.value = true
+  showLoading.value = true
+  uploadProgress.value = 0
+  
+  try {
+    const progressInterval = setInterval(() => {
+      uploadProgress.value = uploadService.getUploadProgress()
+    }, 100)
+    
+    try {
+      const result = await uploadService.analyzeImageWithRetry(imageBlob)
+      
+      rateLimiter.incrementCount()
+      updateRateLimitInfo()
+      
+      recognitionResult.value = result
+      console.log('Recognition result:', result)
+      
+      alert(`AI thinks you drew: ${result.pokemonName} (${result.confidenceScore}% confidence)\n\nExplanation: ${result.explanation}`)
+      
+    } finally {
+      clearInterval(progressInterval)
+    }
+    
+  } catch (error) {
+    console.error('Error submitting drawing:', error)
+    
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred'
+    
+    showErrorDialog(
+      errorMsg,
+      error instanceof Error ? error.stack || '' : ''
+    )
+  } finally {
+    isSubmitting.value = false
+    showLoading.value = false
+    uploadProgress.value = 0
+  }
+}
+
+const handleCancelUpload = () => {
+  uploadService.cancelUpload()
+  showLoading.value = false
+  isSubmitting.value = false
+  uploadProgress.value = 0
+}
+
+const handleCloseError = () => {
+  showError.value = false
+  errorMessage.value = ''
+  errorDetails.value = ''
 }
 
 const handleResetRateLimit = () => {
