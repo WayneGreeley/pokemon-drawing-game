@@ -189,7 +189,7 @@
   - Ensure all tests pass, ask the user if questions arise.
   - Commit and push: "Frontend checkpoint - all tests passing"
 
-- [-] 7. Create AWS SAM infrastructure template
+- [x] 7. Create AWS SAM infrastructure template
   - [x] 7.1 Create SAM template.yaml
     - Define Lambda function resource with Function URL
     - Configure runtime: nodejs20.x, memory: 512MB, timeout: 30s
@@ -232,7 +232,7 @@
     - Output CloudFront domain URL
     - _Requirements: 8.1_
 
-  - [-] 7.6 Commit SAM template
+  - [x] 7.6 Commit SAM template
     - Commit with message: "Add AWS SAM infrastructure template"
     - Push to GitHub
     - _Requirements: Contest submission_
