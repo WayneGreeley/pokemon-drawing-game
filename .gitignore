@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (contains sensitive AWS URLs and IDs)
+.env
+.env.local
+.env.production
+
+# AWS SAM build artifacts and config (contains AWS profile and personal info)
+lambda/.aws-sam/
+lambda/samconfig.toml
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

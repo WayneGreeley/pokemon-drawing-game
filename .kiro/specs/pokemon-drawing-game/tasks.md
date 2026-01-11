@@ -237,15 +237,15 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 8. Implement Lambda function
-  - [ ] 8.1 Create Lambda function structure
+- [-] 8. Implement Lambda function
+  - [x] 8.1 Create Lambda function structure
     - Initialize Node.js Lambda project in /lambda directory
     - Install AWS SDK v3 dependencies (@aws-sdk/client-bedrock-agent-runtime)
     - Set up TypeScript configuration
     - Create handler function skeleton for Function URL events
     - _Requirements: 2.5, 3.1_
 
-  - [ ] 8.2 Implement request parsing and validation
+  - [x] 8.2 Implement request parsing and validation
     - Parse Lambda Function URL event
     - Decode base64 image data from request body
     - Validate Content-Type header
@@ -253,14 +253,14 @@
     - Return 400 Bad Request for invalid inputs
     - _Requirements: 2.5_
 
-  - [ ] 8.3 Implement Bedrock Agent invocation
+  - [x] 8.3 Implement Bedrock Agent invocation
     - Configure Bedrock Agent Runtime client
     - Implement invokeAgent with image data
     - Generate unique session ID for each request
     - Set 30-second timeout
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 8.4 Parse and format agent response
+  - [x] 8.4 Parse and format agent response
     - Extract Pokémon name from agent response
     - Extract confidence score (validate 0-100 range)
     - Extract reasoning/explanation
@@ -271,7 +271,7 @@
     - **Property 6: AI service returns complete recognition result**
     - **Validates: Requirements 3.2, 3.3, 3.4, 3.5**
 
-  - [ ] 8.6 Implement Lambda error handling
+  - [x] 8.6 Implement Lambda error handling
     - Handle Bedrock timeout errors
     - Handle invalid image format errors
     - Log errors securely without exposing credentials
@@ -284,7 +284,7 @@
     - **Property 13: Errors produce user-friendly messages**
     - **Validates: Requirements 6.5, 10.1, 10.2, 10.3, 10.4, 10.5**
 
-  - [ ] 8.8 Deploy infrastructure with SAM
+  - [x] 8.8 Deploy infrastructure with SAM
     - Run `sam build` to package Lambda function
     - Run `sam deploy --guided` for first deployment
     - Provide admin email for SNS notifications as parameter

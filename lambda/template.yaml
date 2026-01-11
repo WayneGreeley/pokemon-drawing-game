@@ -149,38 +149,15 @@ Resources:
     Properties:
       BucketName: !Sub 'pokemon-drawing-game-${AWS::AccountId}-${AWS::Region}'
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
         IgnorePublicAcls: true
-        RestrictPublicBuckets: false
+        RestrictPublicBuckets: true
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
 
-  # S3 bucket policy for CloudFront access
-  FrontendBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref FrontendBucket
-      PolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub '${FrontendBucket}/*'
-            Condition:
-              StringEquals:
-                'AWS:SourceArn': !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
-          - Effect: Deny
-            Principal: '*'
-            Action: 's3:*'
-            Resource:
-              - !Sub '${FrontendBucket}/*'
-              - !GetAtt FrontendBucket.Arn
-            Condition:
-              Bool:
-                'aws:SecureTransport': 'false'
+  # Note: S3 bucket policy will be added after CloudFront is created
 
   # CloudFront Origin Access Control
   OriginAccessControl:
@@ -273,14 +250,14 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub '${AWS::StackName}-BedrockCostProtection'
-      AlarmDescription: Alert when Bedrock invocations exceed 1000 per month
+      AlarmDescription: Alert when Bedrock invocations exceed 233 per week (1000 per month equivalent)
       MetricName: Invocations
       Namespace: AWS/Lambda
       Statistic: Sum
-      Period: 2592000  # 30 days
+      Period: 604800  # 7 days (maximum allowed)
       EvaluationPeriods: 1
       DatapointsToAlarm: 1
-      Threshold: 1000
+      Threshold: 233  # Approximately 1000 per month (1000/30*7 = 233)
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: FunctionName
@@ -312,7 +289,7 @@ Resources:
 Outputs:
   LambdaFunctionUrl:
     Description: Lambda Function URL for the Pokémon recognition API
-    Value: !GetAtt PokemonLambda.FunctionUrl
+    Value: !GetAtt PokemonLambdaUrl.FunctionUrl
     Export:
       Name: !Sub '${AWS::StackName}-LambdaFunctionUrl'
 

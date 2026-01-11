@@ -21,12 +21,36 @@ The SAM template creates:
 
 ## Deployment
 
-1. **Build the application:**
+### Quick Deployment
+
+Use the provided deployment script:
+
+```bash
+cd lambda
+./deploy.sh
+```
+
+The script will:
+1. Install Lambda dependencies
+2. Build the SAM application
+3. Deploy to AWS (with guided setup on first run)
+4. Display stack outputs and next steps
+
+### Manual Deployment
+
+1. **Install Lambda dependencies:**
+   ```bash
+   cd lambda/src
+   npm install --production
+   cd ..
+   ```
+
+2. **Build the application:**
    ```bash
    sam build
    ```
 
-2. **Deploy with guided setup (first time):**
+3. **Deploy with guided setup (first time):**
    ```bash
    sam deploy --guided
    ```
@@ -37,10 +61,25 @@ The SAM template creates:
    - Admin email for notifications
    - Bedrock region (must support Claude 3 Haiku)
 
-3. **Subsequent deployments:**
+4. **Subsequent deployments:**
    ```bash
    sam deploy
    ```
+
+### Post-Deployment
+
+After successful deployment:
+
+1. **Update frontend configuration:**
+   - Copy the Lambda Function URL from the stack outputs
+   - Update your `.env` file: `VITE_LAMBDA_URL=https://your-lambda-url...`
+
+2. **Deploy frontend to S3:**
+   - Build your frontend: `npm run build`
+   - Upload to the S3 bucket: `aws s3 sync dist/ s3://your-bucket-name --delete`
+
+3. **Test the application:**
+   - Visit the CloudFront URL from the stack outputs
 
 ## Configuration
 
