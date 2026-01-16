@@ -49,6 +49,15 @@
       @retry="handleRetryUpload"
       @close="handleCloseError"
     />
+    
+    <!-- Results Display -->
+    <ResultsDisplay
+      :is-visible="showResults"
+      :result="recognitionResult"
+      :drawing-image-url="drawingImageUrl"
+      @close="handleCloseResults"
+      @draw-another="handleDrawAnother"
+    />
   </div>
 </template>
 
@@ -59,6 +68,7 @@ import DrawingCanvas from './components/DrawingCanvas.vue'
 import CanvasControls from './components/CanvasControls.vue'
 import LoadingIndicator from './components/LoadingIndicator.vue'
 import ErrorDialog from './components/ErrorDialog.vue'
+import ResultsDisplay from './components/ResultsDisplay.vue'
 import { rateLimiter } from './services/RateLimiter'
 import { uploadService } from './services/UploadService'
 import type { DrawingTool, RecognitionResult } from './types'
@@ -88,6 +98,8 @@ const lastImageBlob = ref<Blob | null>(null)
 
 // Results state
 const recognitionResult = ref<RecognitionResult | null>(null)
+const showResults = ref(false)
+const drawingImageUrl = ref<string | null>(null)
 
 // Update rate limit info
 const updateRateLimitInfo = () => {
@@ -146,6 +158,12 @@ const handleSubmit = async () => {
     
     lastImageBlob.value = imageBlob
     
+    // Create object URL for displaying the drawing
+    if (drawingImageUrl.value) {
+      URL.revokeObjectURL(drawingImageUrl.value)
+    }
+    drawingImageUrl.value = URL.createObjectURL(imageBlob)
+    
     // Start progress monitoring
     const progressInterval = setInterval(() => {
       uploadProgress.value = uploadService.getUploadProgress()
@@ -158,12 +176,10 @@ const handleSubmit = async () => {
       rateLimiter.incrementCount()
       updateRateLimitInfo()
       
-      // Store result and show success
+      // Store result and show results display
       recognitionResult.value = result
-      console.log('Recognition result:', result)
-      
-      // TODO: Show results in a proper results component
-      alert(`AI thinks you drew: ${result.pokemonName} (${result.confidenceScore}% confidence)\n\nExplanation: ${result.explanation}`)
+      showLoading.value = false
+      showResults.value = true
       
     } finally {
       clearInterval(progressInterval)
@@ -180,7 +196,9 @@ const handleSubmit = async () => {
     )
   } finally {
     isSubmitting.value = false
-    showLoading.value = false
+    if (!showResults.value) {
+      showLoading.value = false
+    }
     uploadProgress.value = 0
   }
 }
@@ -204,6 +222,12 @@ const handleSubmitWithBlob = async (imageBlob: Blob) => {
   uploadProgress.value = 0
   
   try {
+    // Create object URL for displaying the drawing
+    if (drawingImageUrl.value) {
+      URL.revokeObjectURL(drawingImageUrl.value)
+    }
+    drawingImageUrl.value = URL.createObjectURL(imageBlob)
+    
     const progressInterval = setInterval(() => {
       uploadProgress.value = uploadService.getUploadProgress()
     }, 100)
@@ -215,9 +239,8 @@ const handleSubmitWithBlob = async (imageBlob: Blob) => {
       updateRateLimitInfo()
       
       recognitionResult.value = result
-      console.log('Recognition result:', result)
-      
-      alert(`AI thinks you drew: ${result.pokemonName} (${result.confidenceScore}% confidence)\n\nExplanation: ${result.explanation}`)
+      showLoading.value = false
+      showResults.value = true
       
     } finally {
       clearInterval(progressInterval)
@@ -234,7 +257,9 @@ const handleSubmitWithBlob = async (imageBlob: Blob) => {
     )
   } finally {
     isSubmitting.value = false
-    showLoading.value = false
+    if (!showResults.value) {
+      showLoading.value = false
+    }
     uploadProgress.value = 0
   }
 }
@@ -255,6 +280,23 @@ const handleCloseError = () => {
 const handleResetRateLimit = () => {
   rateLimiter.reset()
   updateRateLimitInfo()
+}
+
+const handleCloseResults = () => {
+  showResults.value = false
+}
+
+const handleDrawAnother = () => {
+  showResults.value = false
+  handleClear()
+  
+  // Clean up the drawing image URL
+  if (drawingImageUrl.value) {
+    URL.revokeObjectURL(drawingImageUrl.value)
+    drawingImageUrl.value = null
+  }
+  
+  recognitionResult.value = null
 }
 
 // Initialize rate limit info on mount
