@@ -78,6 +78,48 @@ This project uses the following AWS services:
 
 All infrastructure is defined in `lambda/template.yaml` using AWS SAM.
 
+### CloudWatch Monitoring
+
+The application includes comprehensive monitoring and cost protection through CloudWatch alarms:
+
+#### Configured Alarms
+
+1. **High Invocation Volume Alarm**
+   - **Threshold**: 100 Lambda invocations per day
+   - **Purpose**: Detect unusual traffic patterns
+   - **Action**: Sends SNS notification to admin email
+
+2. **Bedrock Cost Protection Alarm**
+   - **Threshold**: 233 invocations per week (~1000 per month)
+   - **Purpose**: Prevent unexpected AI service costs
+   - **Action**: Sends SNS notification to admin email
+
+3. **Lambda Error Rate Alarm**
+   - **Threshold**: 5 errors within 15 minutes (3 evaluation periods of 5 minutes)
+   - **Purpose**: Detect application issues quickly
+   - **Action**: Sends SNS notification to admin email
+
+#### Viewing Alarms
+
+To check alarm status:
+```bash
+aws cloudwatch describe-alarms --alarm-name-prefix "pokemon-drawing-game"
+```
+
+#### SNS Notifications
+
+- Alarm notifications are sent to the email address specified during SAM deployment
+- **Important**: Check your email for the SNS subscription confirmation after first deployment
+- Click the confirmation link to start receiving alarm notifications
+
+#### Cost Controls
+
+Additional cost protection measures:
+- **Rate limiting**: 10 uploads per hour per user (client-side)
+- **Image size limit**: Maximum 1MB per upload
+- **Efficient AI model**: Claude 3 Haiku (cost-optimized)
+- **Serverless architecture**: Pay only for actual usage
+
 ## Development with Kiro
 
 This project was developed using Kiro's spec-driven development workflow. The complete specification including requirements, design, and implementation tasks can be found in `.kiro/specs/pokemon-drawing-game/`.

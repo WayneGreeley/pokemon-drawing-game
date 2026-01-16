@@ -237,7 +237,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 8. Implement Lambda function
+- [x] 8. Implement Lambda function
   - [x] 8.1 Create Lambda function structure
     - Initialize Node.js Lambda project in /lambda directory
     - Install AWS SDK v3 dependencies (@aws-sdk/client-bedrock-agent-runtime)
@@ -295,20 +295,20 @@
     - Save all values to .env file
     - _Requirements: All backend_
 
-  - [ ] 8.9 Test Lambda Function URL
+  - [x] 8.9 Test Lambda Function URL
     - Test with sample POST request using curl or Postman
     - Verify CORS headers in response
     - Verify Bedrock Agent invocation works
     - Check CloudWatch logs for successful execution
     - _Requirements: All backend_
 
-  - [ ] 8.10 Commit and push Lambda function
+  - [x] 8.10 Commit and push Lambda function
     - Commit with message: "Implement Lambda function and deploy with SAM"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 9. Implement results display component
-  - [ ] 9.1 Create ResultsDisplay Vue component
+- [x] 9. Implement results display component
+  - [x] 9.1 Create ResultsDisplay Vue component
     - Design results layout (drawing + guess side by side)
     - Add Pokémon name display
     - Add confidence score display with percentage
@@ -320,7 +320,7 @@
     - **Property 7: Results display shows all recognition data**
     - **Validates: Requirements 4.1, 4.2, 4.3**
 
-  - [ ] 9.3 Integrate results display with upload service
+  - [x] 9.3 Integrate results display with upload service
     - Display results immediately when Lambda response received
     - Handle loading state while waiting for response
     - Show error message if request fails
@@ -330,13 +330,13 @@
     - **Property 3: Image submission returns AI recognition result**
     - **Validates: Requirements 2.2, 2.5, 3.2, 3.3, 3.4, 3.5**
 
-  - [ ] 9.5 Commit and push results display
+  - [x] 9.5 Commit and push results display
     - Commit with message: "Implement results display component"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 10. Verify CloudWatch monitoring (already deployed via SAM)
-  - [ ] 10.1 Verify CloudWatch alarms in AWS Console
+- [-] 10. Verify CloudWatch monitoring (already deployed via SAM)
+  - [x] 10.1 Verify CloudWatch alarms in AWS Console
     - Check that alarms were created by SAM deployment
     - Verify alarm thresholds are correct
     - Confirm SNS topic subscription (check email for confirmation)
@@ -348,7 +348,7 @@
     - Add cost tracking metrics for Bedrock
     - _Requirements: 9.1, 9.3_
 
-  - [ ] 10.3 Commit and push monitoring documentation
+  - [-] 10.3 Commit and push monitoring documentation
     - Document CloudWatch alarms in README
     - Commit with message: "Document CloudWatch monitoring setup"
     - Push to GitHub
@@ -416,6 +416,19 @@
     - Commit with message: "Complete integration testing and final polish"
     - Push to GitHub
     - _Requirements: Contest submission_
+
+  - [ ] 12.5 Update documentation for hackathon submission
+    - Update README.md with clear project description and setup instructions
+    - Create/update DEVLOG.md documenting development journey, decisions, and challenges
+    - Document Kiro CLI usage and workflow in README
+    - Add demo instructions and screenshots/videos if possible
+    - Ensure all hackathon submission requirements are met (100 points total):
+      * Application Quality (40 points) - functional app
+      * Kiro CLI Usage (20 points) - document specs, tasks, systematic development
+      * Documentation (20 points) - README.md and DEVLOG.md quality
+      * Innovation (15 points) - AI + drawing game concept
+      * Presentation (5 points) - clear project presentation
+    - _Requirements: Contest submission, Hackathon qualification_
 
 - [ ] 13. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
