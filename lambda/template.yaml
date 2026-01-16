@@ -57,8 +57,9 @@ Resources:
             - X-Api-Key
           AllowMethods:
             - POST
+            - OPTIONS
           AllowOrigins:
-            - "*"  # Will be updated with CloudFront domain after deployment
+            - "*"
           MaxAge: 3600
       Role: !GetAtt LambdaExecutionRole.Arn
 
@@ -157,7 +158,9 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: index.html
 
-  # Note: S3 bucket policy will be added after CloudFront is created
+  # Note: S3 bucket policy is managed manually via AWS CLI to avoid circular dependency
+  # Use this command after deployment:
+  # aws s3api put-bucket-policy --bucket <bucket-name> --policy file://bucket-policy.json
 
   # CloudFront Origin Access Control
   OriginAccessControl:

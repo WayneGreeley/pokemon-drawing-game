@@ -6,6 +6,7 @@ version = 0.1
 [default.global]
 [default.global.parameters]
 stack_name = "pokemon-drawing-game"
+region = "us-east-1"
 
 [default.build]
 [default.build.parameters]
@@ -23,11 +24,9 @@ confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "pokemon-drawing-game"
 region = "us-east-1"
+profile = "wmgreeley"
 image_repositories = []
-parameter_overrides = [
-    "AdminEmail=admin@example.com",
-    "BedrockRegion=us-east-1"
-]
+parameter_overrides = "AdminEmail=\"***REMOVED***\" BedrockRegion=\"us-east-1\""
 
 [default.package]
 [default.package.parameters]

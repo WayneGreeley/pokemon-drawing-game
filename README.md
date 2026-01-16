@@ -50,22 +50,65 @@ npm install
 aws configure
 ```
 
-4. Deploy infrastructure:
+4. Deploy backend infrastructure:
 ```bash
 cd lambda
 sam build
 sam deploy --guided
 ```
 
-5. Create `.env` file with Lambda Function URL (from SAM output):
-```
-VITE_LAMBDA_URL=https://your-lambda-url.lambda-url.region.on.aws/
+5. Set up S3 bucket policy for CloudFront (required after first deployment):
+```bash
+./setup-bucket-policy.sh
 ```
 
-6. Run development server:
+6. Create `.env` file with deployment URLs (from SAM output):
+```
+VITE_LAMBDA_URL=https://your-lambda-url.lambda-url.region.on.aws/
+CLOUDFRONT_URL=https://your-distribution.cloudfront.net
+S3_BUCKET_NAME=your-bucket-name
+```
+
+7. Build and deploy frontend:
+```bash
+./deploy-frontend.sh
+```
+
+8. Run development server locally:
 ```bash
 npm run dev
 ```
+
+## Deployment
+
+### Production Deployment
+
+The application is deployed at: **https://***REMOVED***.cloudfront.net**
+
+### Deployment Process
+
+1. **Backend (Lambda + Bedrock)**:
+   ```bash
+   cd lambda
+   sam build
+   sam deploy
+   ```
+
+2. **S3 Bucket Policy** (one-time setup):
+   ```bash
+   ./setup-bucket-policy.sh
+   ```
+
+3. **Frontend (CloudFront + S3)**:
+   ```bash
+   ./deploy-frontend.sh
+   ```
+
+The deployment scripts handle:
+- Building the production frontend bundle
+- Uploading files to S3
+- Invalidating CloudFront cache
+- Ensuring proper CORS configuration
 
 ## AWS Configuration
 

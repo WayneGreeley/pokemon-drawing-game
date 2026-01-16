@@ -27,7 +27,7 @@
     "vitest": "^4.0.15",
     "vue-tsc": "^3.1.4"
   },
-  "description": "A Halloween-themed Pokémon drawing game with AI recognition using AWS Bedrock",
+  "description": "A Pokémon drawing game with AI recognition using AWS Bedrock",
   "keywords": [
     "pokemon",
     "drawing",

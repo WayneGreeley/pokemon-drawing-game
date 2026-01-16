@@ -335,38 +335,38 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 10. Verify CloudWatch monitoring (already deployed via SAM)
+- [x] 10. Verify CloudWatch monitoring (already deployed via SAM)
   - [x] 10.1 Verify CloudWatch alarms in AWS Console
     - Check that alarms were created by SAM deployment
     - Verify alarm thresholds are correct
     - Confirm SNS topic subscription (check email for confirmation)
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-  - [ ] 10.2 Create CloudWatch dashboard (optional - not in SAM)
+  - [ ]* 10.2 Create CloudWatch dashboard (optional - not in SAM)
     - Manually create dashboard in AWS Console
     - Add widgets for Lambda invocations, error rate, duration
     - Add cost tracking metrics for Bedrock
     - _Requirements: 9.1, 9.3_
 
-  - [-] 10.3 Commit and push monitoring documentation
+  - [x] 10.3 Commit and push monitoring documentation
     - Document CloudWatch alarms in README
     - Commit with message: "Document CloudWatch monitoring setup"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 11. Deploy frontend to CloudFront (already created via SAM)
-  - [ ] 11.1 Build frontend for production
+- [-] 11. Deploy frontend to CloudFront (already created via SAM)
+  - [x] 11.1 Build frontend for production
     - Run `npm run build` to create production bundle
     - Verify dist/ directory contains built files
     - _Requirements: 8.1_
 
-  - [ ] 11.2 Upload frontend to S3 bucket
+  - [x] 11.2 Upload frontend to S3 bucket
     - Get S3 bucket name from SAM outputs
     - Run `aws s3 sync dist/ s3://bucket-name --delete`
     - Verify files uploaded successfully
     - _Requirements: 8.1_
 
-  - [ ] 11.3 Update Lambda CORS with CloudFront domain
+  - [x] 11.3 Update Lambda CORS with CloudFront domain
     - Get CloudFront URL from SAM outputs
     - Update SAM template.yaml with CloudFront origin in CORS
     - Redeploy with `sam deploy`
@@ -377,7 +377,7 @@
     - **Property 16: CORS policy restricts unauthorized domains**
     - **Validates: Requirements 8.3, 8.4**
 
-  - [ ] 11.5 Invalidate CloudFront cache
+  - [x] 11.5 Invalidate CloudFront cache
     - Run `aws cloudfront create-invalidation` to clear cache
     - Verify new frontend version loads
     - _Requirements: 8.1_
