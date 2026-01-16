@@ -354,7 +354,7 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [-] 11. Deploy frontend to CloudFront (already created via SAM)
+- [x] 11. Deploy frontend to CloudFront (already created via SAM)
   - [x] 11.1 Build frontend for production
     - Run `npm run build` to create production bundle
     - Verify dist/ directory contains built files
@@ -382,7 +382,7 @@
     - Verify new frontend version loads
     - _Requirements: 8.1_
 
-  - [ ] 11.6 Commit and push deployment scripts
+  - [x] 11.6 Commit and push deployment scripts
     - Create deploy.sh script for frontend deployment
     - Document deployment process in README
     - Commit with message: "Add frontend deployment to CloudFront"

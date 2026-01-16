@@ -83,7 +83,7 @@ npm run dev
 
 ### Production Deployment
 
-The application is deployed at: **https://***REMOVED***.cloudfront.net**
+The application can be deployed to your own AWS account following the steps below.
 
 ### Deployment Process
 
