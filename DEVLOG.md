@@ -48,8 +48,49 @@ An AI-powered web application where users draw Pokémon and receive AI-generated
 - 50 Kiro credits used.
 
 
-### Phase 4: Hackathon Continues (January 2026)
-**Hackathon credits received**
+### Phase 4: Integration Testing & Critical Discovery (January 15, 2026)
+
+#### Morning: Lambda Deployment Fixes
+**CORS Headers Issue - RESOLVED**
+- **Problem:** Lambda responses had duplicate CORS headers causing "multiple values" error
+- **Root cause:** Both Lambda code AND Function URL CORS config were setting headers
+- **Solution:** Removed CORS headers from Lambda `createCorsResponse()` function, letting Function URL config handle it exclusively
+- **Result:** Clean CORS responses without duplication
+
+**IAM Permissions Update - RESOLVED**
+- **Problem:** Bedrock Agent invocation failing with permission errors
+- **Solution:** Updated `lambda/template.yaml` to include both:
+  - `bedrock-agent-runtime:InvokeAgent`
+  - `bedrock:InvokeAgent`
+  - Used wildcard resource (`*`) instead of specific ARN for flexibility
+- **Deployment:** Successfully ran `sam build` and `sam deploy` with profile `wmgreeley`
+
+#### Afternoon: End-to-End Testing
+**Playwright Integration Test**
+- Tested from CloudFront URL: `https://d1mi77qn6jcpqo.cloudfront.net`
+- Drew Pikachu and submitted successfully
+- Lambda invoked correctly with proper CORS handling
+- Request reached Bedrock Agent
+
+#### Critical Discovery: Bedrock Agent Limitation
+**The Fundamental Issue:**
+- **Bedrock Agents do NOT support image analysis** through the `sessionState.files` parameter
+- The `files` parameter is designed for **document attachments** (PDFs, text files), not vision model image analysis
+- Error received: "The overridden prompt that you provided is incorrectly formatted"
+- This is a **fundamental API limitation**, not a configuration issue
+
+**Why This Matters:**
+- The entire project architecture was built around using Bedrock Agents for learning purposes
+- Bedrock Agents are designed for text-based conversational AI with tool use and knowledge bases
+- Image analysis with vision models requires the **InvokeModel API directly**, not the Agent API
+- This represents a critical architectural mismatch between project goals and AWS service capabilities
+
+**Architectural Decision Point:**
+The project now faces two paths:
+1. **Pivot to InvokeModel API**: Abandon Bedrock Agents, use direct model invocation (defeats learning goal)
+2. **Redesign for Agent Orchestration**: Use Agents to orchestrate text-based Pokémon identification without image analysis (fundamentally changes the project)
+
+**Current Status:** Project paused pending architectural decision. All infrastructure is deployed and working correctly - the limitation is in the AWS service design, not our implementation.
 
 ---
 

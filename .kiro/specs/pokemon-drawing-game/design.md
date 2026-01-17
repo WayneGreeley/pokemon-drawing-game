@@ -6,8 +6,8 @@ The Pokémon Drawing Game is a web application that combines client-side drawing
 
 The system is designed with three primary layers:
 1. **Presentation Layer**: A web-based drawing interface built with HTML5 Canvas API
-2. **Integration Layer**: AWS S3 for image storage and AWS Lambda for serverless compute
-3. **AI Layer**: AWS Bedrock Agent powered by Claude 3 Haiku for intelligent Pokémon identification
+2. **Integration Layer**: AWS Lambda for serverless compute and direct API integration
+3. **AI Layer**: AWS Bedrock InvokeModel API with Claude 3.5 Haiku for intelligent Pokémon identification
 
 ## Architecture
 
@@ -19,17 +19,17 @@ graph TB
     Canvas[Drawing Canvas Component]
     Upload[Upload Service]
     Lambda[AWS Lambda Function URL]
-    Agent[Bedrock Agent]
-    Model[Claude 3 Haiku]
+    Bedrock[Bedrock InvokeModel API]
+    Model[Claude 3.5 Haiku Vision]
     
     User -->|draws| Canvas
     Canvas -->|image data| Upload
     Upload -->|POST| Lambda
-    Lambda -->|invoke agent| Agent
-    Agent -->|analyze with| Model
-    Model -->|vision analysis| Agent
-    Agent -->|structured response| Lambda
-    Lambda -->|results| User
+    Lambda -->|invoke model| Bedrock
+    Bedrock -->|vision analysis| Model
+    Model -->|structured response| Bedrock
+    Bedrock -->|results| Lambda
+    Lambda -->|formatted response| User
 ```
 
 ### Component Interaction Flow
@@ -37,10 +37,10 @@ graph TB
 1. User draws on the HTML5 canvas
 2. Canvas converts drawing to image blob (PNG/JPEG)
 3. Upload service POSTs image directly to Lambda Function URL
-4. Lambda receives image data and invokes Bedrock Agent
-5. Bedrock Agent uses Claude 3 Haiku to analyze the image
-6. Agent returns structured response with Pokémon name, confidence score, and reasoning
-7. Lambda formats the agent response and returns it in HTTP response
+4. Lambda receives image data and invokes Bedrock InvokeModel API
+5. Bedrock uses Claude 3.5 Haiku Vision to analyze the image directly
+6. Model returns structured response with Pokémon name, confidence score, and reasoning
+7. Lambda formats the model response and returns it in HTTP response
 8. Frontend receives result and displays to user
 
 ## Components and Interfaces
@@ -157,7 +157,7 @@ interface RecognitionResult {
 - **Responsibilities**:
   - Receive HTTP POST requests with image data
   - Validate image format and size
-  - Invoke Bedrock Agent for analysis
+  - Invoke Bedrock InvokeModel API for analysis
   - Format and return results synchronously
   - Handle errors and timeouts
 - **Function URL Configuration**:
@@ -193,47 +193,64 @@ interface LambdaFunctionURLResult {
 }
 ```
 
-#### AI Recognition Service (Bedrock Agent)
-- **Purpose**: Analyze images and identify Pokémon using an AI agent
-- **Implementation**: AWS Bedrock Agents with Claude 3 Haiku foundation model
-- **Agent Configuration**:
-  - **Agent Name**: PokemonIdentifierAgent
-  - **Foundation Model**: Claude 3 Haiku (cost-effective vision model)
-  - **Agent Instructions**: "You are a Pokémon identification expert. When given an image of a drawing, analyze it and identify which Pokémon was drawn. Provide the Pokémon name, a confidence score (0-100), and explain your reasoning based on visual features like shape, colors, and distinctive characteristics."
-  - **Action Groups**: None required (single-turn image analysis)
-  - **Knowledge Bases**: Optional - Pokémon database for enhanced accuracy
+#### AI Recognition Service (Bedrock InvokeModel)
+- **Purpose**: Analyze images and identify Pokémon using direct model invocation
+- **Implementation**: AWS Bedrock InvokeModel API with Claude 3.5 Haiku Vision model
+- **Model Configuration**:
+  - **Model ID**: `anthropic.claude-3-5-haiku-20241022-v1:0`
+  - **Vision Capabilities**: Native image analysis support
+  - **System Prompt**: "You are a Pokémon identification expert. When given an image of a drawing, analyze it and identify which Pokémon was drawn. Respond with JSON containing: pokemonName (string), confidenceScore (0-100 number), and explanation (string describing visual features)."
+  - **Max Tokens**: 1000
+  - **Temperature**: 0.3 (for consistent responses)
   
-- **Agent Workflow**:
-  1. Lambda invokes Bedrock Agent with image data
-  2. Agent analyzes image using vision capabilities
-  3. Agent returns structured response with Pokémon identification
-  4. Lambda formats response for client
+- **Direct Model Workflow**:
+  1. Lambda receives image data from client
+  2. Lambda converts image to base64 format
+  3. Lambda calls Bedrock InvokeModel API with image and prompt
+  4. Model analyzes image and returns JSON response
+  5. Lambda parses and validates response
+  6. Lambda returns formatted result to client
 
 - **Cost Optimization**:
-  - Claude 3 Haiku: ~$0.00025 per image analysis
-  - Bedrock Agents: No additional cost beyond model inference
+  - Claude 3.5 Haiku: ~$0.0004 per image analysis (input tokens) + ~$0.002 per response (output tokens)
+  - Direct API calls: No agent overhead or additional processing costs
   - Set maximum image size to 1MB to reduce processing costs
-  - Implement response caching for identical images
+  - Implement response caching for identical images (optional)
 
 - **Interface**:
 ```typescript
-interface BedrockAgentService {
-  invokeAgent(imageData: Buffer, sessionId: string): Promise<AgentResponse>;
+interface BedrockInvokeModelService {
+  invokeModel(imageData: Buffer, prompt: string): Promise<ModelResponse>;
 }
 
-interface AgentResponse {
+interface ModelResponse {
   pokemonName: string;
-  confidence: number;
-  reasoning: string;
-  sessionId: string;
+  confidenceScore: number;
+  explanation: string;
 }
 
-interface AgentInvocationParams {
-  agentId: string;
-  agentAliasId: string;
-  sessionId: string;
-  inputText: string;
-  imageData: Buffer;
+interface InvokeModelParams {
+  modelId: string;
+  contentType: 'application/json';
+  accept: 'application/json';
+  body: {
+    anthropic_version: 'bedrock-2023-05-31';
+    max_tokens: number;
+    temperature: number;
+    system: string;
+    messages: Array<{
+      role: 'user';
+      content: Array<{
+        type: 'image' | 'text';
+        source?: {
+          type: 'base64';
+          media_type: string;
+          data: string;
+        };
+        text?: string;
+      }>;
+    }>;
+  };
 }
 ```
 
@@ -349,7 +366,7 @@ interface ErrorResponse {
 ```yaml
 Resources:
   PokemonLambda:           # Lambda function with Function URL
-  LambdaExecutionRole:     # IAM role with Bedrock permissions
+  LambdaExecutionRole:     # IAM role with Bedrock InvokeModel permissions
   HighInvocationAlarm:     # CloudWatch alarm for traffic
   CostProtectionAlarm:     # CloudWatch alarm for Bedrock costs
   ErrorRateAlarm:          # CloudWatch alarm for errors
@@ -465,17 +482,17 @@ interface LambdaCORSConfig {
 - Lambda Function URL: No additional cost
 - Cost: $0/month
 
-**Bedrock AI Service**:
-- Claude 3 Haiku: ~$0.00025 per image analysis
-- Strategy: Implement 10 uploads per session rate limit
-- Expected cost: 2,000 requests × $0.00025 = $0.50 per month
+**Bedrock InvokeModel Service**:
+- Claude 3.5 Haiku: ~$0.0004 per image analysis (input) + ~$0.002 per response (output)
+- Direct API calls: No agent overhead
+- Expected cost: 2,000 requests × $0.0024 = $4.80 per month
 
 **CloudWatch**:
 - Free tier: 10 custom metrics, 10 alarms, 5GB log ingestion, 5GB log storage
 - Expected usage: 3 alarms, 2 custom metrics, 1GB logs
 - Cost: $0/month
 
-**Total Estimated Monthly Cost**: $0.50 (Bedrock only)
+**Total Estimated Monthly Cost**: $4.80 (Bedrock InvokeModel only)
 
 ### Rate Limiting Implementation
 
@@ -491,14 +508,14 @@ interface LambdaCORSConfig {
 
 **Cost Protection**:
 - Hard limit prevents runaway costs from automated abuse
-- Estimated maximum monthly cost: $0.50 (assuming 2,000 uploads at free tier limits)
+- Estimated maximum monthly cost: $4.80 (assuming 2,000 uploads at free tier limits)
 - No database required for rate limiting (client-side localStorage)
 
 ### CloudWatch Monitoring and Alarms
 
 **Metrics to Monitor**:
 1. **Lambda Invocation Count**: Number of times the Lambda function is invoked
-2. **Bedrock Request Count**: Number of agent invocations
+2. **Bedrock InvokeModel Count**: Number of direct model invocations
 3. **Lambda Error Rate**: Percentage of failed Lambda invocations
 4. **Lambda Duration**: Average execution time
 5. **HTTP 4xx/5xx Errors**: Client and server error rates
@@ -512,10 +529,10 @@ interface LambdaCORSConfig {
 - Purpose: Detect potential abuse or unexpected traffic spike
 
 **Alarm 2: Bedrock Cost Protection**
-- Metric: Bedrock InvokeAgent count
+- Metric: Bedrock InvokeModel count
 - Threshold: > 2,000 invocations per month
 - Action: Send SNS notification to admin email
-- Purpose: Prevent exceeding budget ($0.50/month)
+- Purpose: Prevent exceeding budget ($4.80/month)
 
 **Alarm 3: Lambda Error Rate**
 - Metric: Lambda Errors / Lambda Invocations

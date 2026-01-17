@@ -26,7 +26,7 @@ s3_prefix = "pokemon-drawing-game"
 region = "us-east-1"
 profile = "wmgreeley"
 image_repositories = []
-parameter_overrides = "AdminEmail=\"***REMOVED***\" BedrockRegion=\"us-east-1\""
+parameter_overrides = "AdminEmail=\"admin@example.com\" BedrockRegion=\"us-east-1\""
 
 [default.package]
 [default.package.parameters]

@@ -1,12 +1,11 @@
-import { BedrockAgentRuntimeClient, InvokeAgentCommand } from '@aws-sdk/client-bedrock-agent-runtime';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 
 // Environment variables
 const BEDROCK_REGION = process.env.BEDROCK_REGION || 'us-east-1';
-const BEDROCK_AGENT_ID = process.env.BEDROCK_AGENT_ID;
-const BEDROCK_AGENT_ALIAS_ID = process.env.BEDROCK_AGENT_ALIAS_ID;
+const MODEL_ID = 'anthropic.claude-3-5-haiku-20241022-v1:0';
 
 // Initialize Bedrock client
-const bedrockClient = new BedrockAgentRuntimeClient({ 
+const bedrockClient = new BedrockRuntimeClient({ 
   region: BEDROCK_REGION 
 });
 
@@ -46,14 +45,11 @@ export const handler = async (event) => {
     // Validate image data
     const imageBuffer = validateImageData(requestBody.image);
     
-    // Generate unique session ID
-    const sessionId = generateSessionId();
+    // Invoke Bedrock InvokeModel API
+    const result = await invokeBedrockModel(imageBuffer);
     
-    // Invoke Bedrock Agent
-    const result = await invokeBedrockAgent(imageBuffer, sessionId);
-    
-    // Parse and validate agent response
-    const recognitionResult = parseAgentResponse(result);
+    // Parse and validate model response
+    const recognitionResult = parseModelResponse(result);
     
     // Return successful response
     return createCorsResponse(200, {
@@ -154,82 +150,116 @@ function validateImageData(base64Image) {
 }
 
 /**
- * Generate unique session ID for Bedrock Agent
- * @returns {string} Session ID
+ * Invoke Bedrock InvokeModel API for Pokémon identification
+ * @param {Buffer} imageBuffer - Image data
+ * @returns {Object} Model response
  */
-function generateSessionId() {
-  return `pokemon-session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+async function invokeBedrockModel(imageBuffer) {
+  try {
+    // Convert image buffer to base64
+    const base64Image = imageBuffer.toString('base64');
+    
+    // System prompt for Pokémon identification
+    const systemPrompt = `You are a Pokémon identification expert. When given an image of a drawing, analyze it and identify which Pokémon was drawn.
+
+Your response must be valid JSON with exactly these fields:
+{
+  "pokemonName": "Name of the identified Pokémon",
+  "confidenceScore": 85,
+  "explanation": "Detailed explanation of why you think this is the identified Pokémon, mentioning specific visual features like shape, colors, and distinctive characteristics."
 }
 
-/**
- * Invoke Bedrock Agent for Pokémon identification
- * @param {Buffer} imageBuffer - Image data
- * @param {string} sessionId - Session ID
- * @returns {Object} Agent response
- */
-async function invokeBedrockAgent(imageBuffer, sessionId) {
-  if (!BEDROCK_AGENT_ID || !BEDROCK_AGENT_ALIAS_ID) {
-    throw new BedrockError('Bedrock Agent configuration is missing');
-  }
-  
-  try {
-    const command = new InvokeAgentCommand({
-      agentId: BEDROCK_AGENT_ID,
-      agentAliasId: BEDROCK_AGENT_ALIAS_ID,
-      sessionId: sessionId,
-      inputText: 'Please analyze this Pokémon drawing and identify which Pokémon it is.',
-      // Note: Image data handling may need adjustment based on Bedrock Agent capabilities
-      // This is a placeholder - actual implementation may require different approach
+Rules:
+- confidenceScore must be a number between 0 and 100
+- pokemonName should be the official Pokémon name (e.g., "Pikachu", "Charizard")
+- explanation should be detailed and mention specific visual features
+- If you're unsure, still provide your best guess but with a lower confidence score
+- Only respond with the JSON object, no additional text`;
+
+    const command = new InvokeModelCommand({
+      modelId: MODEL_ID,
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: 1000,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: 'image/png',
+                  data: base64Image
+                }
+              },
+              {
+                type: 'text',
+                text: 'Please analyze this Pokémon drawing and identify which Pokémon it is.'
+              }
+            ]
+          }
+        ]
+      })
     });
     
-    console.log('Invoking Bedrock Agent with session:', sessionId);
+    console.log('Invoking Bedrock InvokeModel API');
     
     const response = await bedrockClient.send(command);
     
-    console.log('Bedrock Agent response received');
+    console.log('Bedrock InvokeModel response received');
     
     return response;
   } catch (error) {
-    console.error('Bedrock Agent invocation failed:', error);
-    throw new BedrockError(`Failed to invoke Bedrock Agent: ${error.message}`);
+    console.error('Bedrock InvokeModel invocation failed:', error);
+    throw new BedrockError(`Failed to invoke Bedrock model: ${error.message}`);
   }
 }
 
 /**
- * Parse and validate Bedrock Agent response
- * @param {Object} agentResponse - Raw agent response
+ * Parse and validate Bedrock InvokeModel response
+ * @param {Object} modelResponse - Raw model response
  * @returns {Object} Parsed recognition result
  */
-function parseAgentResponse(agentResponse) {
+function parseModelResponse(modelResponse) {
   try {
-    // Extract response text from Bedrock Agent response
-    // Note: This may need adjustment based on actual response structure
-    let responseText = '';
+    // Parse the response body
+    const responseBody = JSON.parse(new TextDecoder().decode(modelResponse.body));
     
-    if (agentResponse.completion) {
-      responseText = agentResponse.completion;
-    } else if (agentResponse.output && agentResponse.output.text) {
-      responseText = agentResponse.output.text;
-    } else {
-      throw new BedrockError('Invalid response format from Bedrock Agent');
+    console.log('Model response body:', responseBody);
+    
+    // Extract the content from Claude's response
+    if (!responseBody.content || !Array.isArray(responseBody.content) || responseBody.content.length === 0) {
+      throw new BedrockError('Invalid response format from Bedrock model');
     }
     
-    // Parse JSON response
-    const result = JSON.parse(responseText);
+    const textContent = responseBody.content.find(item => item.type === 'text');
+    if (!textContent || !textContent.text) {
+      throw new BedrockError('No text content found in model response');
+    }
+    
+    console.log('Model response text:', textContent.text);
+    
+    // Parse JSON response from the model
+    const result = JSON.parse(textContent.text);
     
     // Validate response structure
     if (!result.pokemonName || typeof result.pokemonName !== 'string') {
-      throw new BedrockError('Invalid pokemonName in agent response');
+      throw new BedrockError('Invalid pokemonName in model response');
     }
     
     if (typeof result.confidenceScore !== 'number' || 
         result.confidenceScore < 0 || 
         result.confidenceScore > 100) {
-      throw new BedrockError('Invalid confidenceScore in agent response');
+      throw new BedrockError('Invalid confidenceScore in model response');
     }
     
     if (!result.explanation || typeof result.explanation !== 'string') {
-      throw new BedrockError('Invalid explanation in agent response');
+      throw new BedrockError('Invalid explanation in model response');
     }
     
     return {
@@ -242,13 +272,13 @@ function parseAgentResponse(agentResponse) {
     if (error instanceof BedrockError) {
       throw error;
     }
-    console.error('Failed to parse agent response:', error);
-    throw new BedrockError('Failed to parse agent response');
+    console.error('Failed to parse model response:', error);
+    throw new BedrockError('Failed to parse model response');
   }
 }
 
 /**
- * Create CORS-enabled HTTP response
+ * Create HTTP response (CORS headers handled by Function URL config)
  * @param {number} statusCode - HTTP status code
  * @param {Object} body - Response body
  * @returns {Object} Lambda response
@@ -257,11 +287,7 @@ function createCorsResponse(statusCode, body) {
   return {
     statusCode,
     headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*', // Will be updated with specific domain
-      'Access-Control-Allow-Headers': 'Content-Type, X-Amz-Date, Authorization, X-Api-Key',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Max-Age': '3600'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(body)
   };

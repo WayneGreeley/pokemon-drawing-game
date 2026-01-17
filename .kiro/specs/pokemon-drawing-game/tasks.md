@@ -206,19 +206,18 @@
     - Configure parameter overrides
     - _Requirements: All backend_
 
-  - [x] 7.3 Add Bedrock Agent to SAM template
-    - Define AWS::Bedrock::Agent resource
-    - Set AgentName: "PokemonIdentifierAgent"
-    - Set FoundationModel: "anthropic.claude-3-haiku-20240307-v1:0"
-    - Configure Instruction with Pokémon identification prompt
-    - Create IAM role for Bedrock Agent with model invocation permissions
-    - Define AWS::Bedrock::AgentAlias for production
-    - Output Agent ID and Alias ID
+  - [x] 7.3 Remove Bedrock Agent from SAM template (Architecture Pivot)
+    - Remove AWS::Bedrock::Agent resource (not needed for direct model invocation)
+    - Remove AWS::Bedrock::AgentAlias resource (not needed)
+    - Remove Bedrock Agent IAM role (not needed)
+    - Update Lambda IAM role to use bedrock:InvokeModel permission instead of agent permissions
+    - Remove Agent ID and Alias ID parameters and outputs
+    - Update Lambda environment variables to remove agent configuration
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
   - [x] 7.4 Add CloudWatch alarms to SAM template
     - Define alarm for high Lambda invocation volume (>1500/day)
-    - Define alarm for Bedrock cost protection (>2000/month)
+    - Define alarm for Bedrock InvokeModel cost protection (>2000/month)
     - Define alarm for Lambda error rate (>10%)
     - Create SNS topic for alarm notifications
     - Add email subscription parameter
@@ -237,15 +236,14 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [x] 8. Implement Lambda function
-  - [x] 8.1 Create Lambda function structure
-    - Initialize Node.js Lambda project in /lambda directory
-    - Install AWS SDK v3 dependencies (@aws-sdk/client-bedrock-agent-runtime)
-    - Set up TypeScript configuration
-    - Create handler function skeleton for Function URL events
+- [ ] 8. Implement Lambda function (Architecture Pivot - InvokeModel API)
+  - [x] 8.1 Update Lambda function dependencies
+    - Replace @aws-sdk/client-bedrock-agent-runtime with @aws-sdk/client-bedrock-runtime
+    - Update package.json with new dependency
+    - Remove agent-related imports and code
     - _Requirements: 2.5, 3.1_
 
-  - [x] 8.2 Implement request parsing and validation
+  - [ ] 8.2 Implement request parsing and validation (no changes needed)
     - Parse Lambda Function URL event
     - Decode base64 image data from request body
     - Validate Content-Type header
@@ -253,27 +251,33 @@
     - Return 400 Bad Request for invalid inputs
     - _Requirements: 2.5_
 
-  - [x] 8.3 Implement Bedrock Agent invocation
-    - Configure Bedrock Agent Runtime client
-    - Implement invokeAgent with image data
-    - Generate unique session ID for each request
+  - [x] 8.3 Implement Bedrock InvokeModel API integration
+    - Configure BedrockRuntimeClient instead of BedrockAgentRuntimeClient
+    - Implement invokeModel with Claude 3.5 Haiku Vision model
+    - Use model ID: anthropic.claude-3-5-haiku-20241022-v1:0
+    - Format image data as base64 in message content
+    - Set system prompt for Pokémon identification
+    - Configure max_tokens: 1000, temperature: 0.3
     - Set 30-second timeout
     - _Requirements: 3.1, 3.2_
 
-  - [x] 8.4 Parse and format agent response
-    - Extract Pokémon name from agent response
+  - [ ] 8.4 Parse and format model response
+    - Extract JSON response from model output
+    - Parse Pokémon name from response
     - Extract confidence score (validate 0-100 range)
     - Extract reasoning/explanation
     - Format response for client
+    - Handle malformed JSON responses
     - _Requirements: 3.3, 3.4, 3.5_
 
-  - [ ]* 8.5 Write property test for agent response
+  - [ ]* 8.5 Write property test for model response
     - **Property 6: AI service returns complete recognition result**
     - **Validates: Requirements 3.2, 3.3, 3.4, 3.5**
 
-  - [x] 8.6 Implement Lambda error handling
-    - Handle Bedrock timeout errors
+  - [ ] 8.6 Implement Lambda error handling (updated for InvokeModel)
+    - Handle Bedrock InvokeModel timeout errors
     - Handle invalid image format errors
+    - Handle model response parsing errors
     - Log errors securely without exposing credentials
     - Return appropriate HTTP status codes (400, 500, 503)
     - Add CORS headers to all responses
@@ -284,26 +288,26 @@
     - **Property 13: Errors produce user-friendly messages**
     - **Validates: Requirements 6.5, 10.1, 10.2, 10.3, 10.4, 10.5**
 
-  - [x] 8.8 Deploy infrastructure with SAM
-    - Run `sam build` to package Lambda function
-    - Run `sam deploy --guided` for first deployment
-    - Provide admin email for SNS notifications as parameter
-    - Confirm changeset and deploy (creates all resources including Bedrock Agent)
-    - Copy Lambda Function URL from outputs
-    - Copy CloudFront URL from outputs
-    - Copy Bedrock Agent ID and Alias ID from outputs
-    - Save all values to .env file
+  - [x] 8.8 Update and redeploy infrastructure with SAM
+    - Update SAM template to remove Bedrock Agent resources
+    - Update Lambda IAM permissions for InvokeModel API
+    - Run `sam build` to package updated Lambda function
+    - Run `sam deploy` to update existing stack
+    - Verify Lambda Function URL still works
+    - Copy Lambda Function URL from outputs (should be same)
+    - Test with sample POST request
     - _Requirements: All backend_
 
-  - [x] 8.9 Test Lambda Function URL
+  - [x] 8.9 Test Lambda Function URL with InvokeModel
     - Test with sample POST request using curl or Postman
     - Verify CORS headers in response
-    - Verify Bedrock Agent invocation works
+    - Verify Bedrock InvokeModel API works correctly
     - Check CloudWatch logs for successful execution
+    - Verify JSON response format matches expected structure
     - _Requirements: All backend_
 
-  - [x] 8.10 Commit and push Lambda function
-    - Commit with message: "Implement Lambda function and deploy with SAM"
+  - [ ] 8.10 Commit and push updated Lambda function
+    - Commit with message: "Architecture pivot: Replace Bedrock Agent with InvokeModel API"
     - Push to GitHub
     - _Requirements: Contest submission_
 
@@ -390,38 +394,55 @@
     - _Requirements: Contest submission_
 
 - [ ] 12. Integration and end-to-end testing
-  - [ ] 12.1 Test complete drawing flow
-    - Draw test Pokémon on canvas
-    - Submit drawing
-    - Verify Lambda Function URL receives request
-    - Verify Bedrock Agent response
-    - Verify results display correctly
+  - [ ] 12.1 Test complete drawing flow end-to-end
+    - Start dev server and navigate to application
+    - Draw test Pokémon on canvas using Playwright
+    - Submit drawing and verify loading indicator appears
+    - Verify Lambda Function URL receives request correctly
+    - Verify Bedrock InvokeModel processes image and returns response
+    - Verify results display shows Pokémon name, confidence score, and explanation
+    - Check CloudWatch logs for successful execution
+    - Test from CloudFront deployment URL (not just localhost)
     - _Requirements: All_
+    - **Note**: Previous attempts revealed Lambda code issues that have been fixed. Need to verify deployment is complete and test again.
 
   - [ ] 12.2 Test error scenarios
-    - Test network failure handling
-    - Test rate limit enforcement
-    - Test invalid image handling
-    - Test timeout handling
+    - Test rate limit enforcement (make 11 uploads to trigger limit)
+    - Test network failure handling (disconnect network during upload)
+    - Test invalid image handling (submit non-image file)
+    - Test timeout handling (if possible with large image)
+    - Test Lambda error responses (400, 500, 503)
+    - Verify error messages are user-friendly
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
   - [ ] 12.3 Test security controls
-    - Verify CORS restrictions work from CloudFront
-    - Verify CORS blocks requests from unauthorized origins
-    - Verify file size limits are enforced
-    - Verify credentials are not logged in CloudWatch
+    - Verify CORS headers are present in Lambda responses
+    - Verify CORS allows CloudFront origin
+    - Test CORS blocks requests from unauthorized origins (use curl with different Origin header)
+    - Verify file size limits are enforced (try uploading >1MB image)
+    - Check CloudWatch logs to verify credentials are not logged
+    - Verify HTTPS is used for all Lambda communication
     - _Requirements: 6.2, 6.5, 8.3, 8.4_
 
-  - [ ] 12.4 Final commit and push
+  - [ ] 12.4 Verify Bedrock InvokeModel is working correctly
+    - Test InvokeModel API responds with structured JSON (pokemonName, confidenceScore, explanation)
+    - Verify Claude 3.5 Haiku Vision model processes images correctly
+    - Verify system prompt instructions are being followed
+    - Check CloudWatch logs for Bedrock InvokeModel invocation details
+    - Test with various drawing styles and Pokémon
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [ ] 12.5 Final commit and push
     - Commit with message: "Complete integration testing and final polish"
     - Push to GitHub
     - _Requirements: Contest submission_
 
-  - [ ] 12.5 Update documentation for hackathon submission
+  - [ ] 12.6 Update documentation for hackathon submission
     - Update README.md with clear project description and setup instructions
-    - Create/update DEVLOG.md documenting development journey, decisions, and challenges
+    - Update DEVLOG.md documenting development journey, decisions, and challenges
     - Document Kiro CLI usage and workflow in README
     - Add demo instructions and screenshots/videos if possible
+    - Document the Bedrock InvokeModel learning experience and challenges faced
     - Ensure all hackathon submission requirements are met (100 points total):
       * Application Quality (40 points) - functional app
       * Kiro CLI Usage (20 points) - document specs, tasks, systematic development
@@ -430,7 +451,112 @@
       * Presentation (5 points) - clear project presentation
     - _Requirements: Contest submission, Hackathon qualification_
 
-- [ ] 13. Final checkpoint - Ensure all tests pass
-  - Ensure all tests pass, ask the user if questions arise.
+- [ ] 13. Write unit tests for frontend components
+  - [ ] 13.1 Write unit tests for RateLimiter service
+    - Test checkLimit() with various session states (new session, active session, expired session)
+    - Test incrementCount() updates localStorage correctly
+    - Test getRemainingCount() returns correct values (10 initially, decrements properly)
+    - Test session expiration logic (1 hour timeout)
+    - Test reset() clears session data from localStorage
+    - Test getCurrentCount() returns accurate upload count
+    - Test getTimeRemaining() and getTimeRemainingFormatted()
+    - _Requirements: 7.3, 7.4_
+
+  - [ ] 13.2 Write unit tests for UploadService
+    - Test analyzeImage() with valid image blob
+    - Test image size validation (max 1MB) - should throw error for oversized images
+    - Test image type validation - should throw error for non-image files
+    - Test blobToBase64() conversion works correctly
+    - Test isValidRecognitionResult() validates response structure
+    - Test analyzeImageWithRetry() implements exponential backoff
+    - Test error handling for various failure scenarios (network error, 400, 500, 503)
+    - Test cancelUpload() aborts in-progress requests
+    - Test rate limit integration (should throw error when limit reached)
+    - _Requirements: 2.1, 2.2, 2.4, 6.1_
+
+  - [ ] 13.3 Write unit tests for DrawingCanvas component
+    - Test canvas initialization (context setup, white background)
+    - Test setTool() changes drawing tool (brush vs eraser)
+    - Test setBrushSize() updates brush size and context lineWidth
+    - Test setColor() updates brush color and context strokeStyle
+    - Test clear() empties canvas and fills with white
+    - Test exportImage() returns valid PNG blob
+    - Test mouse event handlers (startDrawing, draw, stopDrawing)
+    - Test touch event handlers for mobile support
+    - _Requirements: 1.1, 1.2, 1.4, 5.2, 5.3_
+
+  - [ ] 13.4 Write unit tests for ResultsDisplay component
+    - Test component renders with valid recognition result
+    - Test confidence score display and color coding (high/medium/low)
+    - Test explanation text rendering
+    - Test "Draw Another" button emits correct event
+    - Test close button functionality
+    - Test overlay click closes dialog
+    - Test drawing image display
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+
+  - [ ] 13.5 Run all unit tests and verify they pass
+    - Execute `npm run test:run` to run all tests
+    - Fix any failing tests
+    - Ensure test coverage is reasonable (aim for >80% on services)
+    - Commit with message: "Add comprehensive unit tests for frontend"
+    - Push to GitHub
+    - _Requirements: All_
+
+- [ ] 14. Write unit tests for Lambda backend
+  - [ ] 14.1 Set up Lambda testing environment
+    - Install testing dependencies (vitest or jest for Node.js)
+    - Configure test environment for Lambda handler
+    - Set up mocks for AWS SDK (BedrockAgentRuntimeClient)
+    - _Requirements: All backend_
+
+  - [ ] 14.2 Write unit tests for Lambda handler
+    - Test handler with valid POST request and image data
+    - Test handler rejects non-POST requests (405 Method Not Allowed)
+    - Test handler handles OPTIONS requests (CORS preflight)
+    - Test parseRequestBody() with valid and invalid JSON
+    - Test parseRequestBody() with base64 encoded body
+    - _Requirements: 2.5, 6.1_
+
+  - [ ] 14.3 Write unit tests for image validation
+    - Test validateImageData() with valid base64 image
+    - Test validateImageData() rejects empty string
+    - Test validateImageData() rejects non-string input
+    - Test validateImageData() rejects images >1MB
+    - Test validateImageData() rejects images <100 bytes
+    - _Requirements: 2.1_
+
+  - [ ] 14.4 Write unit tests for Bedrock InvokeModel integration
+    - Test invokeBedrockModel() with valid image buffer
+    - Test invokeBedrockModel() throws error when model ID missing
+    - Test invokeBedrockModel() handles Bedrock API errors
+    - Test parseModelResponse() with valid JSON response
+    - Test parseModelResponse() validates pokemonName field
+    - Test parseModelResponse() validates confidenceScore range (0-100)
+    - Test parseModelResponse() validates explanation field
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [ ] 14.5 Write unit tests for error handling
+    - Test ValidationError returns 400 status code
+    - Test BedrockError returns 503 status code
+    - Test generic errors return 500 status code
+    - Test createCorsResponse() includes proper CORS headers
+    - Test error responses don't expose credentials
+    - _Requirements: 6.5, 10.1, 10.2, 10.3, 10.4_
+
+  - [ ] 14.6 Run all Lambda tests and verify they pass
+    - Execute test command to run all Lambda tests
+    - Fix any failing tests
+    - Ensure test coverage is reasonable (aim for >80%)
+    - Commit with message: "Add comprehensive unit tests for Lambda backend"
+    - Push to GitHub
+    - _Requirements: All backend_
+
+- [ ] 15. Final checkpoint - Ensure all tests pass
+  - Run all frontend tests: `npm run test:run`
+  - Run all Lambda tests (if implemented)
+  - Verify no test failures
+  - Verify application works end-to-end
   - Final push to GitHub
   - Verify repository is public and contains .kiro directory
+  - _Requirements: All_
