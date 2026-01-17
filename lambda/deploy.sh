@@ -39,7 +39,7 @@ if [ ! -f samconfig.toml ]; then
     sam deploy --guided
 else
     echo "📝 Deploying with existing configuration..."
-    sam deploy
+    sam deploy --no-confirm-changeset
 fi
 
 # Get outputs

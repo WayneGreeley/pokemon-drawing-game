@@ -56,7 +56,7 @@ Resources:
           AllowMethods:
             - POST
           AllowOrigins:
-            - "https://d1mi77qn6jcpqo.cloudfront.net"
+            - "https://your-distribution.cloudfront.net"
           MaxAge: 3600
       Role: !GetAtt LambdaExecutionRole.Arn
 
@@ -81,7 +81,12 @@ Resources:
               - Effect: Allow
                 Action:
                   - bedrock:InvokeModel
-                Resource: !Sub 'arn:aws:bedrock:${BedrockRegion}::foundation-model/anthropic.claude-3-5-haiku-20241022-v1:0'
+                Resource: !Sub 'arn:aws:bedrock:${BedrockRegion}::foundation-model/amazon.nova-lite-v1:0'
+              - Effect: Allow
+                Action:
+                  - aws-marketplace:ViewSubscriptions
+                  - aws-marketplace:Subscribe
+                Resource: '*'
 
   # S3 bucket for frontend hosting
   FrontendBucket:

@@ -2,7 +2,7 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 
 // Environment variables
 const BEDROCK_REGION = process.env.BEDROCK_REGION || 'us-east-1';
-const MODEL_ID = 'anthropic.claude-3-5-haiku-20241022-v1:0';
+const MODEL_ID = 'amazon.nova-lite-v1:0';
 
 // Initialize Bedrock client
 const bedrockClient = new BedrockRuntimeClient({ 
@@ -159,8 +159,20 @@ async function invokeBedrockModel(imageBuffer) {
     // Convert image buffer to base64
     const base64Image = imageBuffer.toString('base64');
     
-    // System prompt for Pokémon identification
-    const systemPrompt = `You are a Pokémon identification expert. When given an image of a drawing, analyze it and identify which Pokémon was drawn.
+    // Amazon Nova Lite InvokeModel format - corrected with proper schema
+    const payload = {
+      schemaVersion: "messages-v1",
+      messages: [{
+        role: "user",
+        content: [{
+          image: {
+            format: "png",
+            source: {
+              bytes: base64Image
+            }
+          }
+        }, {
+          text: `You are a Pokémon identification expert. Analyze this hand-drawn image and identify which Pokémon was drawn.
 
 Your response must be valid JSON with exactly these fields:
 {
@@ -174,37 +186,20 @@ Rules:
 - pokemonName should be the official Pokémon name (e.g., "Pikachu", "Charizard")
 - explanation should be detailed and mention specific visual features
 - If you're unsure, still provide your best guess but with a lower confidence score
-- Only respond with the JSON object, no additional text`;
+- Only respond with the JSON object, no additional text`
+        }]
+      }],
+      inferenceConfig: {
+        maxTokens: 1000,
+        temperature: 0.7
+      }
+    };
 
     const command = new InvokeModelCommand({
       modelId: MODEL_ID,
-      contentType: 'application/json',
-      accept: 'application/json',
-      body: JSON.stringify({
-        anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 1000,
-        temperature: 0.3,
-        system: systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: 'image/png',
-                  data: base64Image
-                }
-              },
-              {
-                type: 'text',
-                text: 'Please analyze this Pokémon drawing and identify which Pokémon it is.'
-              }
-            ]
-          }
-        ]
-      })
+      body: JSON.stringify(payload),
+      contentType: "application/json",
+      accept: "application/json"
     });
     
     console.log('Invoking Bedrock InvokeModel API');
@@ -232,20 +227,23 @@ function parseModelResponse(modelResponse) {
     
     console.log('Model response body:', responseBody);
     
-    // Extract the content from Claude's response
-    if (!responseBody.content || !Array.isArray(responseBody.content) || responseBody.content.length === 0) {
-      throw new BedrockError('Invalid response format from Bedrock model');
+    // Extract the content from Nova Lite's response format (corrected path)
+    let responseText = null;
+    
+    // Nova Lite InvokeModel response format
+    if (responseBody.output && responseBody.output.message && responseBody.output.message.content && 
+        Array.isArray(responseBody.output.message.content) && responseBody.output.message.content.length > 0) {
+      responseText = responseBody.output.message.content[0].text;
     }
     
-    const textContent = responseBody.content.find(item => item.type === 'text');
-    if (!textContent || !textContent.text) {
+    if (!responseText) {
       throw new BedrockError('No text content found in model response');
     }
     
-    console.log('Model response text:', textContent.text);
+    console.log('Model response text:', responseText);
     
     // Parse JSON response from the model
-    const result = JSON.parse(textContent.text);
+    const result = JSON.parse(responseText);
     
     // Validate response structure
     if (!result.pokemonName || typeof result.pokemonName !== 'string') {

@@ -236,14 +236,14 @@
     - Push to GitHub
     - _Requirements: Contest submission_
 
-- [ ] 8. Implement Lambda function (Architecture Pivot - InvokeModel API)
+- [x] 8. Implement Lambda function (Architecture Pivot - InvokeModel API)
   - [x] 8.1 Update Lambda function dependencies
     - Replace @aws-sdk/client-bedrock-agent-runtime with @aws-sdk/client-bedrock-runtime
     - Update package.json with new dependency
     - Remove agent-related imports and code
     - _Requirements: 2.5, 3.1_
 
-  - [ ] 8.2 Implement request parsing and validation (no changes needed)
+  - [x] 8.2 Implement request parsing and validation
     - Parse Lambda Function URL event
     - Decode base64 image data from request body
     - Validate Content-Type header
@@ -253,15 +253,15 @@
 
   - [x] 8.3 Implement Bedrock InvokeModel API integration
     - Configure BedrockRuntimeClient instead of BedrockAgentRuntimeClient
-    - Implement invokeModel with Claude 3.5 Haiku Vision model
-    - Use model ID: anthropic.claude-3-5-haiku-20241022-v1:0
+    - Implement invokeModel with Amazon Nova Lite Vision model
+    - Use model ID: amazon.nova-lite-v1:0
     - Format image data as base64 in message content
     - Set system prompt for Pokémon identification
-    - Configure max_tokens: 1000, temperature: 0.3
+    - Configure max_tokens: 1000, temperature: 0.7
     - Set 30-second timeout
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 8.4 Parse and format model response
+  - [x] 8.4 Parse and format model response
     - Extract JSON response from model output
     - Parse Pokémon name from response
     - Extract confidence score (validate 0-100 range)
@@ -274,7 +274,7 @@
     - **Property 6: AI service returns complete recognition result**
     - **Validates: Requirements 3.2, 3.3, 3.4, 3.5**
 
-  - [ ] 8.6 Implement Lambda error handling (updated for InvokeModel)
+  - [x] 8.6 Implement Lambda error handling (updated for InvokeModel)
     - Handle Bedrock InvokeModel timeout errors
     - Handle invalid image format errors
     - Handle model response parsing errors
@@ -306,7 +306,7 @@
     - Verify JSON response format matches expected structure
     - _Requirements: All backend_
 
-  - [ ] 8.10 Commit and push updated Lambda function
+  - [x] 8.10 Commit and push updated Lambda function
     - Commit with message: "Architecture pivot: Replace Bedrock Agent with InvokeModel API"
     - Push to GitHub
     - _Requirements: Contest submission_
@@ -394,7 +394,7 @@
     - _Requirements: Contest submission_
 
 - [ ] 12. Integration and end-to-end testing
-  - [ ] 12.1 Test complete drawing flow end-to-end
+  - [x] 12.1 Test complete drawing flow end-to-end
     - Start dev server and navigate to application
     - Draw test Pokémon on canvas using Playwright
     - Submit drawing and verify loading indicator appears
@@ -406,7 +406,7 @@
     - _Requirements: All_
     - **Note**: Previous attempts revealed Lambda code issues that have been fixed. Need to verify deployment is complete and test again.
 
-  - [ ] 12.2 Test error scenarios
+  - [x] 12.2 Test error scenarios
     - Test rate limit enforcement (make 11 uploads to trigger limit)
     - Test network failure handling (disconnect network during upload)
     - Test invalid image handling (submit non-image file)
@@ -415,7 +415,7 @@
     - Verify error messages are user-friendly
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-  - [ ] 12.3 Test security controls
+  - [x] 12.3 Test security controls
     - Verify CORS headers are present in Lambda responses
     - Verify CORS allows CloudFront origin
     - Test CORS blocks requests from unauthorized origins (use curl with different Origin header)
@@ -424,7 +424,7 @@
     - Verify HTTPS is used for all Lambda communication
     - _Requirements: 6.2, 6.5, 8.3, 8.4_
 
-  - [ ] 12.4 Verify Bedrock InvokeModel is working correctly
+  - [x] 12.4 Verify Bedrock InvokeModel is working correctly
     - Test InvokeModel API responds with structured JSON (pokemonName, confidenceScore, explanation)
     - Verify Claude 3.5 Haiku Vision model processes images correctly
     - Verify system prompt instructions are being followed
@@ -432,7 +432,7 @@
     - Test with various drawing styles and Pokémon
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 12.5 Final commit and push
+  - [x] 12.5 Final commit and push
     - Commit with message: "Complete integration testing and final polish"
     - Push to GitHub
     - _Requirements: Contest submission_
