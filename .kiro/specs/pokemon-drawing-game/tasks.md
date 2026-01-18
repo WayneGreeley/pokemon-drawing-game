@@ -103,7 +103,7 @@
     - Test deployment instructions work from scratch
     - _Requirements: Contest submission_
 
-- [-] 12. Write unit tests for core functionality
+- [x] 12. Write unit tests for core functionality
   - [x] 12.1 Write unit tests for RateLimiter service
     - Test session management and expiration logic
     - Test upload count tracking and limits
@@ -128,48 +128,43 @@
     - Test user interaction handling
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-  - [-] 12.5 Run all tests and verify coverage
+  - [x] 12.5 Run all tests and verify coverage
     - Execute `npm run test:run` to run all tests
     - Fix any failing tests
     - Ensure reasonable test coverage
     - Commit with message: "Add comprehensive unit tests"
     - _Requirements: All_
 
-- [ ]* 13. Property-based testing (Optional)
-  - [ ]* 13.1 Write property tests for drawing tools
+- [x] 13. Property-based testing 
+  - [x] 13.1 Write property tests for drawing tools
     - **Property 1: Tool selection enables drawing**
     - **Validates: Requirements 1.2**
 
-  - [ ]* 13.2 Write property tests for canvas operations
+  - [x] 13.2 Write property tests for canvas operations
     - **Property 8: Clear button empties canvas**
     - **Property 9: Clear resets tool settings**
     - **Validates: Requirements 5.2, 5.3**
 
-  - [ ]* 13.3 Write property tests for image export
+  - [x] 13.3 Write property tests for image export
     - **Property 2: Canvas to image conversion produces valid format**
     - **Validates: Requirements 2.1**
 
-  - [ ]* 13.4 Write property tests for upload functionality
+  - [x] 13.4 Write property tests for upload functionality
     - **Property 3: Image submission returns AI recognition result**
     - **Property 4: Upload progress shows loading indicator**
     - **Property 5: Failed upload provides retry capability**
     - **Property 10: Lambda communication uses HTTPS**
     - **Validates: Requirements 2.2, 2.3, 2.4, 2.5, 3.2, 3.3, 3.4, 3.5, 6.1**
 
-  - [ ]* 13.5 Write property tests for AI service
+  - [x] 13.5 Write property tests for AI service
     - **Property 6: AI service returns complete recognition result**
     - **Validates: Requirements 3.2, 3.3, 3.4, 3.5**
 
-  - [ ]* 13.6 Write property tests for results display
+  - [x] 13.6 Write property tests for results display
     - **Property 7: Results display shows all recognition data**
     - **Validates: Requirements 4.1, 4.2, 4.3**
 
-  - [ ]* 13.7 Write property tests for rate limiting
-    - **Property 14: Rate limit enforced per session**
-    - **Property 15: Upload count tracking is accurate**
-    - **Validates: Requirements 7.3, 7.4**
-
-  - [ ]* 13.8 Write property tests for security
+  - [x] 13.7 Write property tests for security
     - **Property 12: Error logs exclude credentials**
     - **Property 13: Errors produce user-friendly messages**
     - **Property 16: CORS policy restricts unauthorized domains**
