@@ -149,7 +149,7 @@ describe('ResultsDisplay Property-Based Tests', () => {
           })
           
           // Then: Should display all data correctly
-          expect(wrapper.find('.pokemon-name .value').text()).toBe(result.pokemonName)
+          expect(wrapper.find('.pokemon-name .value').text().trim()).toBe(result.pokemonName.trim())
           expect(wrapper.find('.confidence-text').text()).toBe(`${result.confidenceScore}%`)
           expect(wrapper.find('.explanation-text').text().trim()).toBe(result.explanation.trim())
           
