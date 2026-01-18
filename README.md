@@ -40,20 +40,7 @@ Want to try the application? Here's how to get started quickly:
 ### Option 1: Try the Live Demo
 🎮 **[Try the Live Demo](https://d1mi77qn6jcpqo.cloudfront.net/)** - Draw a Pokémon and see AI recognition in action!
 
-### Option 2: Local Development
-```bash
-# Clone and install
-git clone https://github.com/WayneGreeley/pokemon-drawing-game.git
-cd pokemon-drawing-game
-npm install
-
-# Start development server (frontend only)
-npm run dev
-```
-
-**Note**: For full functionality including AI recognition, you'll need to deploy the AWS backend (see Setup Instructions below).
-
-## How to Use
+#### How to Use
 
 1. **Draw**: Use the brush tool to draw your favorite Pokémon on the canvas
 2. **Customize**: Choose colors, adjust brush size, or use the eraser
@@ -67,9 +54,10 @@ npm run dev
 - Use clear, bold strokes
 - Popular Pokémon tend to get better recognition
 
-## Setup Instructions
 
-### Prerequisites
+### Option 2: Deploy to your AWS Account
+
+#### Prerequisites
 
 Before you begin, ensure you have:
 
@@ -79,9 +67,9 @@ Before you begin, ensure you have:
   - Permissions for Lambda, S3, CloudFront, CloudWatch, and IAM
 - **AWS SAM CLI** installed ([Installation Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
 
-### Installation & Deployment
+#### Installation & Deployment
 
-#### Step 1: Clone and Install Dependencies
+##### Step 1: Clone and Install Dependencies
 
 ```bash
 # Clone the repository
@@ -97,7 +85,7 @@ npm install
 cd ../..
 ```
 
-#### Step 2: Configure AWS Credentials
+##### Step 2: Configure AWS Credentials
 
 ```bash
 # Configure AWS CLI (do NOT commit these credentials)
@@ -107,7 +95,7 @@ aws configure
 aws sts get-caller-identity
 ```
 
-#### Step 3: Deploy Backend Infrastructure
+##### Step 3: Deploy Backend Infrastructure
 
 ```bash
 cd lambda
@@ -128,7 +116,7 @@ sam deploy --guided
 - Admin email for CloudWatch alarms
 - Confirm changes and IAM role creation
 
-#### Step 4: Configure S3 Bucket Policy
+##### Step 4: Configure S3 Bucket Policy
 
 After first deployment, set up the S3 bucket policy for CloudFront:
 
@@ -141,7 +129,7 @@ chmod +x setup-bucket-policy.sh
 ./setup-bucket-policy.sh
 ```
 
-#### Step 5: Configure Environment Variables
+##### Step 5: Configure Environment Variables
 
 Create a `.env` file in the project root with the deployment URLs from SAM output:
 
@@ -156,7 +144,7 @@ VITE_LAMBDA_URL=https://your-lambda-url.lambda-url.region.on.aws/
 sam list stack-outputs --stack-name pokemon-drawing-game
 ```
 
-#### Step 6: Deploy Frontend
+##### Step 6: Deploy Frontend
 
 ```bash
 # Build and deploy frontend to S3/CloudFront
@@ -164,55 +152,12 @@ chmod +x deploy-frontend.sh
 ./deploy-frontend.sh
 ```
 
-#### Step 7: Verify Deployment
+##### Step 7: Verify Deployment
 
 1. **Check CloudFront URL**: Find your distribution URL in AWS Console → CloudFront
 2. **Test the application**: Visit the CloudFront URL and try drawing a Pokémon
 3. **Monitor CloudWatch**: Check that alarms are configured properly
 
-### Local Development
-
-For local development with hot reload:
-
-```bash
-# Start development server
-npm run dev
-
-# Run tests
-npm run test:run
-
-# Run only property-based tests
-npm run test:run -- --reporter=verbose src/**/*.pbt.test.ts
-```
-
-**Note**: Local development will show the drawing interface, but AI recognition requires the deployed AWS backend.
-
-## Deployment
-
-The application uses a serverless architecture deployed entirely on AWS. The deployment process handles:
-- Building the production frontend bundle
-- Uploading files to S3
-- Invalidating CloudFront cache
-- Ensuring proper CORS configuration
-
-### Production Deployment Steps
-
-1. **Backend (Lambda + Bedrock)**:
-   ```bash
-   cd lambda
-   sam build
-   sam deploy --no-confirm-changeset
-   ```
-
-2. **S3 Bucket Policy** (one-time setup):
-   ```bash
-   ./setup-bucket-policy.sh
-   ```
-
-3. **Frontend (CloudFront + S3)**:
-   ```bash
-   ./deploy-frontend.sh
-   ```
 
 ## AWS Configuration & Architecture
 
