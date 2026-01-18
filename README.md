@@ -38,7 +38,7 @@ Perfect for Pokémon fans, AI enthusiasts, and anyone interested in creative AI 
 Want to try the application? Here's how to get started quickly:
 
 ### Option 1: Try the Live Demo
-Visit the deployed application at: `https://your-cloudfront-domain.cloudfront.net`
+🎮 **[Try the Live Demo](https://d3p8zr6fzjw5k5.cloudfront.net)** - Draw a Pokémon and see AI recognition in action!
 
 ### Option 2: Local Development
 ```bash
@@ -76,18 +76,8 @@ Before you begin, ensure you have:
 - **Node.js 20+** and npm installed
 - **AWS Account** with the following:
   - AWS CLI configured with appropriate credentials
-  - Access to AWS Bedrock (specifically Amazon Nova Lite model)
   - Permissions for Lambda, S3, CloudFront, CloudWatch, and IAM
 - **AWS SAM CLI** installed ([Installation Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
-
-### AWS Bedrock Setup
-
-**Important**: You must enable Amazon Nova Lite in AWS Bedrock before deployment:
-
-1. Go to AWS Console → Bedrock → Model Access
-2. Request access to **Amazon Nova Lite** model
-3. Wait for approval (usually immediate for Nova Lite)
-4. Verify access in your target deployment region
 
 ### Installation & Deployment
 
@@ -199,17 +189,19 @@ npm run test:run -- --reporter=verbose src/**/*.pbt.test.ts
 
 ## Deployment
 
-### Production Deployment
+The application uses a serverless architecture deployed entirely on AWS. The deployment process handles:
+- Building the production frontend bundle
+- Uploading files to S3
+- Invalidating CloudFront cache
+- Ensuring proper CORS configuration
 
-The application can be deployed to your own AWS account following the steps below.
-
-### Deployment Process
+### Production Deployment Steps
 
 1. **Backend (Lambda + Bedrock)**:
    ```bash
    cd lambda
    sam build
-   sam deploy
+   sam deploy --no-confirm-changeset
    ```
 
 2. **S3 Bucket Policy** (one-time setup):
@@ -221,12 +213,6 @@ The application can be deployed to your own AWS account following the steps belo
    ```bash
    ./deploy-frontend.sh
    ```
-
-The deployment scripts handle:
-- Building the production frontend bundle
-- Uploading files to S3
-- Invalidating CloudFront cache
-- Ensuring proper CORS configuration
 
 ## AWS Configuration & Architecture
 
@@ -448,11 +434,11 @@ src/
 
 ### Common Issues
 
-#### 1. Bedrock Access Denied
+#### 1. Bedrock Model Availability
 ```
 Error: AccessDeniedException: User is not authorized to perform: bedrock:InvokeModel
 ```
-**Solution**: Enable Amazon Nova Lite model access in AWS Bedrock console.
+**Solution**: Ensure Amazon Nova Lite model is available in your AWS deployment region (us-east-1 recommended).
 
 #### 2. CORS Errors
 ```
@@ -494,26 +480,6 @@ aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/pokemon"
 2. **Review SAM Outputs**: `sam list stack-outputs --stack-name pokemon-drawing-game`
 3. **Validate Configuration**: Ensure all environment variables are set correctly
 4. **Test Components**: Use browser developer tools to debug frontend issues
-
-## Contributing
-
-We welcome contributions! Please follow these guidelines:
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Follow the Kiro spec-driven development process
-4. Write tests for new functionality
-5. Ensure all tests pass: `npm run test:run`
-6. Submit a pull request
-
-### Code Standards
-
-- **TypeScript**: Strict mode enabled, no `any` types
-- **Vue 3**: Composition API with `<script setup>` syntax
-- **Testing**: Both unit tests and property-based tests required
-- **Documentation**: Update README and spec files for significant changes
 
 ## License
 
