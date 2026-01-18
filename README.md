@@ -38,7 +38,7 @@ Perfect for Pokémon fans, AI enthusiasts, and anyone interested in creative AI 
 Want to try the application? Here's how to get started quickly:
 
 ### Option 1: Try the Live Demo
-🎮 **[Try the Live Demo](https://d3p8zr6fzjw5k5.cloudfront.net)** - Draw a Pokémon and see AI recognition in action!
+🎮 **[Try the Live Demo](https://d1mi77qn6jcpqo.cloudfront.net/)** - Draw a Pokémon and see AI recognition in action!
 
 ### Option 2: Local Development
 ```bash
